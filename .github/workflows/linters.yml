@@ -1,0 +1,44 @@
+name: Linters
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      # Run ESLint (JavaScript/TypeScript)
+      - name: Run ESLint
+        run: |
+          yarn eslint "**/*.{js,jsx,ts,tsx}"
+
+      # Run Stylelint (SCSS/CSS)
+      - name: Run Stylelint
+        run: |
+          yarn stylelint "**/*.{css,scss,less}"
+
+      # Run Commitlint (Commit messages)
+      - name: Run Commitlint
+        run: |
+          yarn commitlint --from=HEAD~1 --to=HEAD

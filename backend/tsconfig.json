@@ -1,15 +1,21 @@
 {
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "strict": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "target": "ES6",
-    "lib": ["ES6"]
-  },
-  "include": ["src/**/*.ts"], 
-  "exclude": ["node_modules", "dist"]
-}
+    "compilerOptions": {
+      "target": "es6",
+      "module": "commonjs",
+      "strict": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "outDir": "./dist",
+      "composite": true, 
+      "declaration": true,
+      "esModuleInterop": true
+    },
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist"
+    ]
+  }
+  
