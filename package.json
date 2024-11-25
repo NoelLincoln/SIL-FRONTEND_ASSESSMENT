@@ -12,7 +12,8 @@
     "build": "yarn --cwd backend build && yarn --cwd client build",
     "start": "concurrently \"yarn --cwd backend start\" \"yarn --cwd client preview\"",
     "test": "concurrently \"yarn --cwd backend test\" \"yarn --cwd client test\"",
-    "lint:fix": "yarn --cwd backend lint:fix && yarn --cwd client lint:fix"
+    "lint:fix": "yarn --cwd backend lint:fix && yarn --cwd client lint:fix",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@babel/core": "7.x",
@@ -24,7 +25,7 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "concurrently": "^8.2.0",
-    "eslint": "^9.0.0",
+    "eslint": "^9.15.0",
     "eslint-config-airbnb": "18.x",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-import": "2.x",
@@ -32,7 +33,22 @@
     "eslint-plugin-jsx-a11y": "6.x",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "stylelint": "^16.10.0",
+    "stylelint-config-standard": "^36.0.1",
     "typescript": "5.6.2",
     "typescript-eslint": "^8.15.0"
+  },
+  "lint-staged": {
+    "client/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "backend/**/*.{ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
