@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist", // Set the output directory for transpiled JS files
+    "baseUrl": ".", // Make sure the base URL is set to the root
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "ES6",
+    "lib": ["ES6", "DOM"],
+    "skipLibCheck": true
+  },
+  "include": [],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "./backend/tsconfig.json"
+    }
+  ]
+}
