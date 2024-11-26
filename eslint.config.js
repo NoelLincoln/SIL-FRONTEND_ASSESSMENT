@@ -1,29 +1,28 @@
-import js from '@eslint/js';
-import tsParser from '@typescript-eslint/parser';
-import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
-import tseslint from 'typescript-eslint';
+import tsParser from '@typescript-eslint/parser'
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
 
 export default [
-  // Strict TypeScript ESLint rules
-  ...tseslint.configs.strict,
-
   {
-    files: ['**/*.ts', '**/*.mjs'], // Exclude .js files here
+    files: ['**/*.ts'],
     languageOptions: {
-      parser: tsParser, // Ensure TypeScript parser is used
+      parser: tsParser,
     },
+    env: {
+      node: true, // Enables Node.js globals
+      es2021: true,
+    },
+    plugins: ['@typescript-eslint'],
+    extends: [
+      'eslint:recommended',
+      'plugin:@typescript-eslint/recommended',
+    ],
     rules: {
-      'no-undef': 'warn',
-      'no-unused-vars': 'warn',
-      'semi': ['error', 'never'], // Enforce no semicolons
+      'no-undef': 'off',
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'semi': ['error', 'never'],
     },
   },
-
-  // Standard JavaScript ESLint rules
-  js.configs.recommended,
-
-  // Ignore certain folders and files
   {
-    ignores: ['**/node_modules', 'dist/', '**/*.js'], // Ignore all .js files
+    ignores: ['node_modules', 'dist'],
   },
-];
+]
