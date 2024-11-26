@@ -22,7 +22,7 @@
     "@babel/preset-react": "7.x",
     "@eslint/js": "^9.15.0",
     "@types/node": "^22.9.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^5.0.0",
     "concurrently": "^8.2.0",
     "eslint": "^9.15.0",
@@ -38,17 +38,6 @@
     "prettier": "^3.3.3",
     "stylelint": "^16.10.0",
     "stylelint-config-standard": "^36.0.1",
-    "typescript": "5.6.2",
-    "typescript-eslint": "^8.15.0"
-  },
-  "lint-staged": {
-    "client/**/*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "backend/**/*.{ts}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "typescript": "5.6.2"
   }
 }
