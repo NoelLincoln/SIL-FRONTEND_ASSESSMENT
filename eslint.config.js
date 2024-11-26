@@ -25,7 +25,6 @@ export default [
        
       // Custom rules
       "no-undef": "off", // Disable no-undef rule
-      "semi": ["error", "never"], // Enforce no semicolons
     },
   }, 
   {

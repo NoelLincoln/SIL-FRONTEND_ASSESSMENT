@@ -1,4 +1,3 @@
-// src/app.ts
 import express from "express";
 import session from "express-session";
 import passport from "./config/passportConfig"; // Import passport from the config file
@@ -38,6 +37,9 @@ app.get(
 app.use("/api/users", userRoutes);
 
 // Start the server
-app.listen(5000, () => {
-  console.log("Server is running on port 5000");
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
+
+export { app, server };

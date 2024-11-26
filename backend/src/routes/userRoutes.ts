@@ -38,7 +38,7 @@ router.post("/", createUser);
 /**
  * Update user by ID
  */
-router.put("/:id", updateUser);
+router.patch("/:id", updateUser);
 
 /**
  * Delete a user by ID
