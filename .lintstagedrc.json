@@ -1,5 +1,5 @@
 {
   "client/**/*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
   "client/**/*.{css,scss,sass,less,styled.css}": ["stylelint --fix", "prettier --write"],
-  "backend/**/*.ts": ["eslint --fix", "prettier --write"]
+  "backend/**/*.{ts}": ["eslint --fix", "prettier --write"]
 }
