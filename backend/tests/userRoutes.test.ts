@@ -1,17 +1,31 @@
 import request from "supertest";
 import { server } from "../src/app"; // Import the server instance
+import { PrismaClient } from "@prisma/client"; // Assuming you're using Prisma as your ORM
+const prisma = new PrismaClient();
 
 describe("User Routes", () => {
+  let userId: string;
+
   // Increase the timeout for beforeAll hook
-  beforeAll((done) => {
-    done();
+  beforeAll(async () => {
+    // Automatically create a test user before all tests
+    const user = await prisma.user.create({
+      data: {
+        githubId: "271222547",
+        username: "newrone",
+        email: "nerpdoqwre1@gmail.com",
+        name: "New User Two",
+      },
+    });
+
+    userId = user.id;
   }, 10000); // Set the timeout to 10 seconds for the beforeAll hook
 
-  // Close the server after all tests to avoid the "address in use" error
-  afterAll((done) => {
-    server.close(() => {
-      done();
-    });
+  // Close the server and clean up the test data after all tests
+  afterAll(async () => {
+    // Clean up users and close server
+    await prisma.user.deleteMany();
+    server.close(() => {});
   });
 
   // Test GET /api/users
@@ -24,10 +38,10 @@ describe("User Routes", () => {
   // Test POST /api/users
   it("should create a new user", async () => {
     const newUser = {
-      githubId: "271222547",
-      username: "newrone",
-      email: "nerpdoqwre1@gmail.com",
-      name: "New User Two",
+      githubId: "271222548", // Change the githubId to ensure uniqueness
+      username: "newuserthree",
+      email: "newuserthree@example.com",
+      name: "New User Three",
     };
 
     const response = await request(server)
@@ -44,7 +58,6 @@ describe("User Routes", () => {
 
   // Test GET /api/users/:id
   it("should fetch a user by ID", async () => {
-    const userId = "e06596b6-44b6-4af1-879a-e4d95ee7be52";
     const response = await request(server).get(`/api/users/${userId}`);
     expect(response.status).toBe(200);
     expect(response.body.id).toBe(userId);
@@ -52,7 +65,6 @@ describe("User Routes", () => {
 
   // Test PUT /api/users/:id
   it("should update a user by ID", async () => {
-    const userId = "e06596b6-44b6-4af1-879a-e4d95ee7be52"; // Replace with a valid user ID
     const updatedUser = {
       username: "johnupdated",
       email: "johnupdated@example.com",
@@ -70,8 +82,6 @@ describe("User Routes", () => {
 
   // Test DELETE /api/users/:id
   it("should delete a user by ID", async () => {
-    const userId = "e06596b6-44b6-4af1-879a-e4d95ee7be52"; // Replace with a valid user ID
-
     const response = await request(server)
       .delete(`/api/users/${userId}`)
       .set("Accept", "application/json");
