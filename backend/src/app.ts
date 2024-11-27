@@ -3,6 +3,7 @@ import session from "express-session";
 import passport from "./config/passportConfig"; // Import passport from the config file
 import userRoutes from "./routes/userRoutes";
 import albumRoutes from "./routes/albumRoutes";
+import photoRoutes from "./routes/photoRoutes";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.get(
 // Routes for user actions
 app.use("/api/users", userRoutes);
 app.use("/api/albums", albumRoutes);
+app.use("/api/photos", photoRoutes);
 // Start the server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
