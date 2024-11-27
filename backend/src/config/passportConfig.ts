@@ -15,6 +15,7 @@ passport.use(
         "http://localhost:5000/api/auth/github/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
+      console.log("Guthub user prof", profile);
       try {
         const username = profile.username || "";
         const email = profile.emails?.[0]?.value || "";
