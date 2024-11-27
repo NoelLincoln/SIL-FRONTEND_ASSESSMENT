@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "install:all": "yarn install --cwd backend && yarn install --cwd client",
+    "install": "yarn install --cwd backend && yarn install --cwd client",
     "dev": "concurrently \"yarn --cwd backend dev\" \"yarn --cwd client dev\"",
     "build": "yarn --cwd backend build && yarn --cwd client build",
     "start": "concurrently \"yarn --cwd backend start\" \"yarn --cwd client preview\"",
