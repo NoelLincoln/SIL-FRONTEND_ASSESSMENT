@@ -8,9 +8,12 @@ const prisma = new PrismaClient();
  */
 export const handleGitHubUser = async (profile: any): Promise<User> => {
   const { id, username, displayName, emails } = profile;
+
+  // Check if the user already exists using the GitHub ID
   let user = await getUserByGitHubId(id);
 
   if (!user) {
+    // If the user doesn't exist, create a new user in the database
     user = await createUser(
       id,
       username,

@@ -11,10 +11,14 @@ import {
 /**
  * Handle GitHub user creation if they don't exist in the database
  */
+// Handle GitHub user creation if they don't exist in the database
 export const handleGitHubUser = async (profile: any, res: Response) => {
   try {
+    // Call the service function to handle the GitHub user
     const user = await handleGitHubUserService(profile);
-    res.status(200).json(user); // Return the user data after processing
+
+    // Return the user data after processing (user creation/updating)
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Error processing GitHub user", error });
   }
