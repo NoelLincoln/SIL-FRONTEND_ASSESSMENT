@@ -30,13 +30,7 @@ jobs:
           yarn install
 
       # Run tests for the backend and client
-      - name: Run Backend Tests
-        working-directory: ./backend
-        run: |
-          yarn test
-
-      - name: Run Client Tests
-        working-directory: ./client
+      - name: Run Tests
         run: |
           yarn test
 
