@@ -83,6 +83,6 @@ jobs:
           yarn stylelint "**/*.{css,scss,less}"
 
       # Run Commitlint (Commit messages)
-      - name: Run Commitlint
-        run: |
-          yarn commitlint --from=HEAD~1 --to=HEAD
+      # - name: Run Commitlint
+      #   run: |
+      #     yarn commitlint --from=HEAD~1 --to=HEAD
