@@ -8,10 +8,10 @@ const prisma = new PrismaClient();
 passport.use(
   new GitHubStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientID: process.env.GHUB_CLIENT_ID!,
+      clientSecret: process.env.GHUB_CLIENT_SECRET!,
       callbackURL:
-        process.env.GITHUB_CALLBACK_URL ||
+        process.env.GHUB_CALLBACK_URL ||
         "http://localhost:5000/api/auth/github/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
