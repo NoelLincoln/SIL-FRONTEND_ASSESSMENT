@@ -1,4 +1,4 @@
-name: Linters
+name: Linters and Tests
 
 on:
   pull_request:
@@ -9,8 +9,41 @@ on:
       - main
 
 jobs:
+  # Run tests
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      # Run tests for the backend and client
+      - name: Run Backend Tests
+        working-directory: ./backend
+        run: |
+          yarn test
+
+      - name: Run Client Tests
+        working-directory: ./client
+        run: |
+          yarn test
+
+  # Run linters
   lint:
     runs-on: ubuntu-latest
+    needs: test  # Ensure linters run only if tests pass
 
     steps:
       # Checkout the code
