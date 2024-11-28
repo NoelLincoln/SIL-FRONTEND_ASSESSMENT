@@ -1,7 +1,5 @@
-// UserDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Header from "./Header";
 
 const UserDetails: React.FC = () => {
   const { userId } = useParams(); // Extract userId from the URL
@@ -20,7 +18,7 @@ const UserDetails: React.FC = () => {
           {
             method: "GET",
             credentials: "include",
-          },
+          }
         );
         if (!userResponse.ok) {
           throw new Error("Failed to fetch user details");
@@ -34,7 +32,7 @@ const UserDetails: React.FC = () => {
           {
             method: "GET",
             credentials: "include",
-          },
+          }
         );
         if (!albumsResponse.ok) {
           throw new Error("Failed to fetch albums");
@@ -62,18 +60,25 @@ const UserDetails: React.FC = () => {
   }
 
   return (
-    <>
-      <Header />
-      <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">User Details</h1>
-        {userDetails ? (
-          <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-            <h2 className="text-2xl font-semibold">{userDetails.username}</h2>
-            <p className="text-gray-700">Email: {userDetails.email}</p>
-          </div>
-        ) : (
-          <div>No user data found</div>
-        )}
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">User Details</h1>
+
+      {/* Wrapper div enclosing both user details and albums */}
+      <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
+        {/* User Details Section */}
+        <div className="mb-8">
+          {userDetails ? (
+            <>
+              <h2 className="text-2xl font-semibold">{userDetails.username}</h2>
+              <p className="text-gray-700">Email: {userDetails.email}</p>
+            </>
+          ) : (
+            <div>No user data found</div>
+          )}
+        </div>
+
+        {/* Horizontal Line to Separate Sections */}
+        <hr className="my-6 border-t-2 border-gray-200" />
 
         {/* Albums Section */}
         <div>
@@ -81,10 +86,7 @@ const UserDetails: React.FC = () => {
           {userAlbums.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userAlbums.map((album: any) => (
-                <div
-                  key={album.id}
-                  className="bg-white p-4 rounded-lg shadow-md"
-                >
+                <div key={album.id} className="bg-white p-4 rounded-lg shadow-md">
                   <h4 className="text-lg font-semibold">{album.title}</h4>
                 </div>
               ))}
@@ -94,7 +96,7 @@ const UserDetails: React.FC = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
