@@ -1,6 +1,7 @@
 import request from "supertest";
 import { server } from "../src/app"; // Import the server instance
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 describe("Album Routes", () => {
@@ -9,6 +10,10 @@ describe("Album Routes", () => {
 
   // Increase the timeout for beforeAll hook if needed
   beforeAll(async () => {
+    // Ensure a clean database state
+    await prisma.album.deleteMany();
+    await prisma.user.deleteMany();
+
     // Create a test user
     const user = await prisma.user.create({
       data: {
@@ -30,14 +35,14 @@ describe("Album Routes", () => {
     });
 
     albumId = album.id;
-  }, 10000); // Set the timeout to 10 seconds for the beforeAll hook
+  }, 20000); // Set the timeout to 20 seconds for the beforeAll hook
 
-  // Close the server after all tests to avoid "address in use" error
+  // Close the server and clean up data after all tests
   afterAll(async () => {
-    await prisma.album.deleteMany(); // Clean up the albums
-    await prisma.user.deleteMany(); // Clean up the users
-
-    server.close();
+    await prisma.album.deleteMany(); // Clean up albums
+    await prisma.user.deleteMany(); // Clean up users
+    await prisma.$disconnect(); // Disconnect Prisma client
+    server.close(); // Close server to avoid "address in use" errors
   });
 
   // Test GET /api/albums
@@ -46,6 +51,7 @@ describe("Album Routes", () => {
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBeGreaterThan(0);
   });
 
   // Test GET /api/albums/:id
@@ -53,52 +59,41 @@ describe("Album Routes", () => {
     const response = await request(server).get(`/api/albums/${albumId}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.id).toBe(albumId);
-    expect(response.body.title).toBe("Test Album");
+    expect(response.body).toHaveProperty("id", albumId);
+    expect(response.body).toHaveProperty("title", "Test Album");
   });
 
-  // Test POST /api/albums (Create a new album)
+  // Test POST /api/albums
   it("should create a new album", async () => {
-    const newAlbum = {
-      title: "New Test Album",
-      userId: userId,
-    };
+    const newAlbum = { title: "New Test Album", userId };
 
     const response = await request(server)
       .post("/api/albums")
-      .send(newAlbum)
-      .set("Accept", "application/json");
-
-    console.log("Response Status: ", response.status); // Log status for debugging
-    console.log("Response Body: ", response.body); // Log body for debugging
+      .send(newAlbum);
 
     expect(response.status).toBe(201);
-    expect(response.body.title).toBe(newAlbum.title);
-    expect(response.body.userId).toBe(userId);
+    expect(response.body).toHaveProperty("title", "New Test Album");
+    expect(response.body).toHaveProperty("userId", userId);
   });
 
-  // Test PATCH /api/albums/:id (Update an album)
+  // Test PUT /api/albums/:id
   it("should update an album by ID", async () => {
-    const updatedAlbum = {
-      title: "Updated Test Album",
-    };
+    const updatedData = { title: "Updated Test Album" };
 
     const response = await request(server)
-      .patch(`/api/albums/${albumId}`)
-      .send(updatedAlbum)
-      .set("Accept", "application/json");
+      .put(`/api/albums/${albumId}`)
+      .send(updatedData);
 
     expect(response.status).toBe(200);
-    expect(response.body.title).toBe(updatedAlbum.title);
+    expect(response.body).toHaveProperty("id", albumId);
+    expect(response.body).toHaveProperty("title", "Updated Test Album");
   });
 
-  // Test DELETE /api/albums/:id (Delete an album)
+  // Test DELETE /api/albums/:id
   it("should delete an album by ID", async () => {
-    const response = await request(server)
-      .delete(`/api/albums/${albumId}`)
-      .set("Accept", "application/json");
+    const response = await request(server).delete(`/api/albums/${albumId}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.message).toBe("Album deleted successfully");
+    expect(response.body).toHaveProperty("message", "Album deleted successfully");
   });
 });
