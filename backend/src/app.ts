@@ -1,21 +1,22 @@
-// app.js or server.js
 import express from "express";
 import session from "express-session";
-import passport from "./config/passportConfig"; // Passport configuration
+import passport from "./config/passportConfig";
 import userRoutes from "./routes/userRoutes";
 import albumRoutes from "./routes/albumRoutes";
 import photoRoutes from "./routes/photoRoutes";
-import authRoutes from "./routes/authRoutes"; // Import authentication routes
+import authRoutes from "./routes/authRoutes";
 import cors from "cors";
 
 const app = express();
 
+// Enable CORS for the frontend
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true, // Allow cookies to be sent with requests
   }),
 );
+
 // Middleware to parse JSON body
 app.use(express.json());
 
@@ -24,7 +25,12 @@ app.use(
   session({
     secret: "vfdfsdc3221",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Don't save uninitialized sessions
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+    },
   }),
 );
 

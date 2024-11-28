@@ -1,10 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import axios from "axios"; // Import Axios for making API requests
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
-  const [userEmail, setUserEmail] = useState<string>("user@example.com");
+  const [userEmail, setUserEmail] = useState<string | null>(null); // Default to null until we fetch the email
+
+  // Fetch user email on component mount
+  useEffect(() => {
+    // Call the /api/auth/me route to get the logged-in user's email
+    axios
+      .get("http://localhost:5000/api/auth/me", { withCredentials: true }) // Adjust URL to your backend
+      .then((response) => {
+        setUserEmail(response.data.email); // Set the email state
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+        setUserEmail(null); // Handle error (user might not be logged in)
+      });
+  }, []); // Empty dependency array to run once when component mounts
 
   // Toggle nav menu
   const toggleNav = () => {
@@ -50,7 +65,7 @@ const Header: React.FC = () => {
                 className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
                 onClick={(e) => e.stopPropagation()}
               >
-                <p>{userEmail}</p>
+                <p>{userEmail ? userEmail : "Loading..."}</p>
                 <button
                   className="text-red-500 mt-2"
                   onClick={() => console.log("Logging out...")}
@@ -104,7 +119,7 @@ const Header: React.FC = () => {
                 className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
                 onClick={(e) => e.stopPropagation()}
               >
-                <p>{userEmail}</p>
+                <p>{userEmail ? userEmail : "Loading..."}</p>
                 <button
                   className="text-red-500 mt-2"
                   onClick={() => console.log("Logging out...")}
