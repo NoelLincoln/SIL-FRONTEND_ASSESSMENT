@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Header from "./Header";
+import UserCard from "./UserCard";
 
 const Home: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -9,26 +10,24 @@ const Home: React.FC = () => {
 
   // Fetch users and albums
   useEffect(() => {
-    // Fetch users
     const fetchUsers = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/users", {
           method: "GET",
-          credentials: "include", // Include credentials for session
+          credentials: "include",
         });
         if (!response.ok) {
           throw new Error("Failed to fetch users");
         }
         const usersData = await response.json();
         setUsers(usersData);
+        setLoading(false); // Set loading to false after data is fetched
       } catch (err: any) {
         setError("Error fetching users");
-      } finally {
         setLoading(false);
       }
     };
 
-    // Fetch albums for each user
     const fetchAlbums = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/albums", {
@@ -49,9 +48,13 @@ const Home: React.FC = () => {
     fetchAlbums();
   }, []);
 
-  const getUserAlbumCount = (userId: string) => {
-    return albums.filter((album: any) => album.userId === userId).length;
-  };
+  // Use useCallback to avoid unnecessary re-renders
+  const getUserAlbumCount = useCallback(
+    (userId: string) => {
+      return albums.filter((album: any) => album.userId === userId).length;
+    },
+    [albums], // Only re-run the function if albums change
+  );
 
   if (loading) {
     return <div>Loading...</div>;
@@ -69,16 +72,11 @@ const Home: React.FC = () => {
           <h1 className="text-3xl font-bold text-center mb-8">Users List</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {users.map((user) => (
-              <div
+              <UserCard
                 key={user.id}
-                className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center"
-              >
-                <h2 className="text-xl font-semibold mb-2">{user.username}</h2>
-                <p className="text-gray-700">Email: {user.email}</p>
-                <p className="text-gray-700">
-                  Albums: {getUserAlbumCount(user.id)}
-                </p>
-              </div>
+                user={user}
+                albumCount={getUserAlbumCount(user.id)}
+              />
             ))}
           </div>
         </div>

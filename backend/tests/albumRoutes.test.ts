@@ -1,6 +1,6 @@
 import request from "supertest";
 import { server } from "../src/app"; // Import the server instance
-import { PrismaClient } from "@prisma/client"; // Assuming you're using Prisma as the ORM for the database
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 describe("Album Routes", () => {
