@@ -18,7 +18,7 @@ const Albums: React.FC = () => {
   const [albumPhotos, setAlbumPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>(""); // Add userId state
-  const [userEmail, setUserEmail] = useState<string | null>(null); // Add userEmail state
+  // const [userEmail, setUserEmail] = useState<string | null>(null);
 
   // Fetch albums and user details on component mount
   useEffect(() => {
@@ -38,12 +38,10 @@ const Albums: React.FC = () => {
     axios
       .get("http://localhost:5000/api/auth/me", { withCredentials: true }) // Adjust URL to your backend
       .then((response) => {
-        setUserEmail(response.data.email); // Set the email state
         setUserId(response.data.id); // Set the userId state
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);
-        setUserEmail(null); // Handle error (user might not be logged in)
       });
   }, []); // Empty dependency array to run once when component mounts
 
