@@ -1,4 +1,5 @@
 import { PrismaClient, Album } from "@prisma/client";
+import cloudinary from "../config/cloudinaryConfig";
 
 const prisma = new PrismaClient();
 
@@ -28,6 +29,26 @@ export const createAlbum = async (data: {
   return prisma.album.create({
     data,
   });
+};
+
+/**
+ * Add photos to an album
+ */
+export const addPhotosToAlbum = async (
+  albumId: string,
+  photoUrls: string[],
+): Promise<void> => {
+  await Promise.all(
+    photoUrls.map((url) =>
+      prisma.photo.create({
+        data: {
+          title: "Photo",
+          imageUrl: url,
+          albumId,
+        },
+      }),
+    ),
+  );
 };
 
 /**

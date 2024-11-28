@@ -41,7 +41,7 @@ router.get("/me", (req, res) => {
   if (req.isAuthenticated()) {
     // Type assertion to inform TypeScript that req.user is of type `User`
     const user = req.user as User;
-    res.json({ email: user.email });
+    res.json({ id: user.id, email: user.email });
   } else {
     // User is not logged in
     res.status(401).json({ message: "Not authenticated" });

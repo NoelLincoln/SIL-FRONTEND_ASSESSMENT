@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import {
   getAlbums,
   getAlbumById,
@@ -8,6 +9,7 @@ import {
 } from "../controllers/albumController";
 
 const router = express.Router();
+const upload = multer({ dest: "uploads/" });
 
 /**
  * Get all albums
@@ -22,7 +24,7 @@ router.get("/:id", getAlbumById);
 /**
  * Create a new album
  */
-router.post("/", createAlbum);
+router.post("/", upload.array("photos", 3), createAlbum);
 
 /**
  * Update album by ID

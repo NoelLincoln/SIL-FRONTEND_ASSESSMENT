@@ -14,6 +14,7 @@ const Header: React.FC = () => {
       .get("http://localhost:5000/api/auth/me", { withCredentials: true }) // Adjust URL to your backend
       .then((response) => {
         setUserEmail(response.data.email); // Set the email state
+        console.log("User Id:", response.data.userId);
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);
@@ -52,6 +53,12 @@ const Header: React.FC = () => {
           <a href="/" className="hover:text-gray-400">
             Home
           </a>
+          <a href="/albums" className="hover:text-gray-400">
+            Albums
+          </a>
+          <a href="/add-album" className="hover:text-gray-400">
+            Add Album
+          </a>
           <div className="relative">
             <button
               onClick={toggleProfile}
@@ -85,9 +92,7 @@ const Header: React.FC = () => {
 
       {/* Mobile Navigation Menu */}
       {isNavOpen && (
-        <div
-          className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2"
-        >
+        <div className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2">
           <div className="flex flex-col items-center space-y-6">
             {/* Close Icon */}
             <button
@@ -104,6 +109,20 @@ const Header: React.FC = () => {
               onClick={closeNav}
             >
               Home
+            </a>
+            <a
+              href="/albums"
+              className="block text-lg font-medium hover:text-gray-400"
+              onClick={closeNav}
+            >
+              Albums
+            </a>
+            <a
+              href="/add-album"
+              className="block text-lg font-medium hover:text-gray-400"
+              onClick={closeNav}
+            >
+              Add Album
             </a>
             <div className="relative">
               <button
