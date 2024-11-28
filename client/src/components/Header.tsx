@@ -84,53 +84,53 @@ const Header: React.FC = () => {
       </div>
 
       {/* Mobile Navigation Menu */}
-      <div
-        className={`lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform ${
-          isNavOpen ? "translate-x-0" : "translate-x-full"
-        } w-1/2`}
-      >
-        <div className="flex flex-col items-center space-y-6">
-          {/* Close Icon */}
-          <button
-            className="absolute top-6 right-6 text-white"
-            onClick={closeNav}
-          >
-            <FaTimes size={30} />
-          </button>
-
-          {/* Menu Items */}
-          <a
-            href="/home"
-            className="block text-lg font-medium hover:text-gray-400"
-            onClick={closeNav}
-          >
-            Home
-          </a>
-          <div className="relative">
+      {isNavOpen && (
+        <div
+          className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2"
+        >
+          <div className="flex flex-col items-center space-y-6">
+            {/* Close Icon */}
             <button
-              onClick={toggleProfile}
-              className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
+              className="absolute top-6 right-6 text-white"
+              onClick={closeNav}
             >
-              <FaUserCircle size={24} />
-              <span>Profile</span>
+              <FaTimes size={30} />
             </button>
-            {isProfileOpen && (
-              <div
-                className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
-                onClick={(e) => e.stopPropagation()}
+
+            {/* Menu Items */}
+            <a
+              href="/home"
+              className="block text-lg font-medium hover:text-gray-400"
+              onClick={closeNav}
+            >
+              Home
+            </a>
+            <div className="relative">
+              <button
+                onClick={toggleProfile}
+                className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
               >
-                <p>{userEmail ? userEmail : "Loading..."}</p>
-                <button
-                  className="text-red-500 mt-2"
-                  onClick={() => console.log("Logging out...")}
+                <FaUserCircle size={24} />
+                <span>Profile</span>
+              </button>
+              {isProfileOpen && (
+                <div
+                  className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Logout
-                </button>
-              </div>
-            )}
+                  <p>{userEmail ? userEmail : "Loading..."}</p>
+                  <button
+                    className="text-red-500 mt-2"
+                    onClick={() => console.log("Logging out...")}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Background overlay for closing the mobile menu */}
       {isNavOpen && (
