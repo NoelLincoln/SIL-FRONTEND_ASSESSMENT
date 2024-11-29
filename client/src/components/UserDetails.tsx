@@ -6,6 +6,7 @@ const UserDetails: React.FC = () => {
   const { userId } = useParams(); // Extract userId from the URL
   const [userDetails, setUserDetails] = useState<any>(null);
   const [userAlbums, setUserAlbums] = useState<any[]>([]);
+  const [albumPhotos, setAlbumPhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +52,48 @@ const UserDetails: React.FC = () => {
       fetchUserDetailsAndAlbums();
     }
   }, [userId]);
+
+  // Fetch photos for each album
+  useEffect(() => {
+    const fetchPhotosForAlbums = async () => {
+      const photos: Record<string, string> = {};
+
+      for (const album of userAlbums) {
+        try {
+          const photosResponse = await fetch(
+            `http://localhost:5000/api/photos/albums/${album.id}`,
+            {
+              method: "GET",
+              credentials: "include",
+            },
+          );
+          if (!photosResponse.ok) {
+            throw new Error(`Failed to fetch photos for album ${album.id}`);
+          }
+          const photosData = await photosResponse.json();
+
+          if (photosData.length > 0) {
+            // Select the first photo or a random one
+            const randomPhoto =
+              photosData[Math.floor(Math.random() * photosData.length)];
+            photos[album.id] = randomPhoto.imageUrl;
+          } else {
+            photos[album.id] = ""; // Default to no image
+          }
+        } catch (err: any) {
+          console.error(
+            `Error fetching photos for album ${album.id}: ${err.message}`,
+          );
+        }
+      }
+
+      setAlbumPhotos(photos);
+    };
+
+    if (userAlbums.length > 0) {
+      fetchPhotosForAlbums();
+    }
+  }, [userAlbums]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -104,9 +147,9 @@ const UserDetails: React.FC = () => {
                       </Link>
                     </h4>
                     {/* Album Image */}
-                    {album.imageUrl ? (
+                    {albumPhotos[album.id] ? (
                       <img
-                        src={album.imageUrl}
+                        src={albumPhotos[album.id]}
                         alt={`${album.title} cover`}
                         className="w-full h-40 object-cover rounded-md mb-2"
                       />

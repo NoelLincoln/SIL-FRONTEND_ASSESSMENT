@@ -9,7 +9,7 @@ const upload = multer({ dest: "uploads/" }); // configure multer for file upload
 router.post("/", upload.single("photo"), photoController.createPhoto);
 
 // Get all photos in an album
-router.get("/albums/:albumId/photos", photoController.getPhotosByAlbumId);
+router.get("/albums/:albumId", photoController.getPhotosByAlbumId);
 
 // Get a photo by ID
 router.get("/:id", photoController.getPhotoById);

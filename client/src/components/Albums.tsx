@@ -13,7 +13,8 @@ interface Album {
   id: string;
   title: string;
   userId: string;
-  photos: Photo[]; // Array of Photo objects
+  photos: Photo[];
+  username?: string; // Optional username field
 }
 
 const Albums: React.FC = () => {
@@ -26,23 +27,34 @@ const Albums: React.FC = () => {
   const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
-    // Fetch albums and their photos
-    const fetchAlbums = async () => {
+    const fetchAlbumsAndUsers = async () => {
       try {
-        const albumResponse = await axios.get(
-          "http://localhost:5000/api/albums",
-        );
-        const albumData: Album[] = albumResponse.data;
+        const [albumResponse, userResponse] = await Promise.all([
+          axios.get("http://localhost:5000/api/albums"),
+          axios.get("http://localhost:5000/api/users"),
+        ]);
 
-        // Fetch photos for each album based on the album id
+        const albumData: Album[] = albumResponse.data;
+        const userData = userResponse.data; // Assuming it returns an array of users
+
+        // Create a mapping of userId to username
+        const userMap = userData.reduce(
+          (
+            acc: Record<string, string>,
+            user: { id: string; username: string },
+          ) => {
+            acc[user.id] = user.username;
+            return acc;
+          },
+          {},
+        );
+
+        // Fetch photos and add username to each album
         const updatedAlbums = await Promise.all(
           albumData.map(async (album) => {
             const photosResponse = await axios.get(
-              `http://localhost:5000/api/photos/album/${album.id}`,
+              `http://localhost:5000/api/photos/albums/${album.id}`,
             );
-            console.log("photo data", photosResponse.data);
-
-            // Map the photos to objects containing id, title, and imageUrl
             const photos: Photo[] = photosResponse.data.map(
               (photo: { imageUrl: string; id: string; title: string }) => ({
                 imageUrl: photo.imageUrl,
@@ -50,21 +62,24 @@ const Albums: React.FC = () => {
                 title: photo.title,
               }),
             );
-            console.log("photos obj", photos);
 
-            return { ...album, photos };
+            return {
+              ...album,
+              photos,
+              username: userMap[album.userId] || "Unknown",
+            };
           }),
         );
 
         setAlbums(updatedAlbums);
       } catch (error) {
-        console.error("Error fetching albums or photos:", error);
+        console.error("Error fetching albums or users:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAlbums();
+    fetchAlbumsAndUsers();
 
     // Fetch current user details
     axios
@@ -124,7 +139,6 @@ const Albums: React.FC = () => {
     <>
       <Header />
       <div className="container mx-auto p-6">
-        {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">
             {albums.length === 0 ? "No Albums yet 😞" : "All Albums"}
@@ -137,7 +151,6 @@ const Albums: React.FC = () => {
           </button>
         </div>
 
-        {/* Album List */}
         {albums.length === 0 ? (
           <div className="text-center">
             <p className="mt-2">Be the first one to add one!</p>
@@ -156,15 +169,15 @@ const Albums: React.FC = () => {
                     href={`/users/${album.userId}`}
                     className="text-blue-500 hover:underline"
                   >
-                    {album.userId}
+                    {album.username}
                   </a>
                 </p>
                 <div className="flex flex-wrap gap-4">
                   {album.photos && album.photos.length > 0 ? (
                     album.photos.map((photo, index) => (
                       <img
-                        key={photo.id} // Use the photo id as the key
-                        src={photo.imageUrl} // Display the image using imageUrl
+                        key={photo.id}
+                        src={photo.imageUrl}
                         alt={`Album ${album.title} - ${photo.title}`}
                         className="w-32 h-32 object-cover rounded"
                       />
@@ -182,70 +195,6 @@ const Albums: React.FC = () => {
               </div>
             ))}
           </div>
-        )}
-
-        {/* Modal for Adding an Album */}
-        {isModalOpen && (
-          <>
-            <div
-              className="fixed inset-0 bg-black opacity-50 z-10"
-              onClick={toggleModal}
-            />
-            <div className="fixed inset-0 flex justify-center items-center z-20">
-              <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-                <div className="flex justify-end">
-                  <button onClick={toggleModal}>
-                    <FaTimes size={20} className="text-gray-500" />
-                  </button>
-                </div>
-                <h2 className="text-2xl mb-4">Add a New Album</h2>
-                <form>
-                  <div className="mb-4">
-                    <label htmlFor="albumTitle" className="block text-lg mb-2">
-                      Album Title
-                    </label>
-                    <input
-                      type="text"
-                      id="albumTitle"
-                      value={albumTitle}
-                      onChange={(e) => setAlbumTitle(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded"
-                      placeholder="Enter album title"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="albumPhotos" className="block text-lg mb-2">
-                      Upload Photos (Max 3)
-                    </label>
-                    <input
-                      type="file"
-                      id="albumPhotos"
-                      multiple
-                      onChange={handlePhotoChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded"
-                    />
-                    <div className="mt-4 flex space-x-4">
-                      {photoPreviews.map((preview, index) => (
-                        <img
-                          key={index}
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="w-24 h-24 object-cover rounded"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddAlbum}
-                    className="w-full bg-blue-600 text-white py-2 rounded-full"
-                  >
-                    Add Album
-                  </button>
-                </form>
-              </div>
-            </div>
-          </>
         )}
       </div>
     </>

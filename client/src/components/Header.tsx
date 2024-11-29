@@ -50,7 +50,7 @@ const Header: React.FC = () => {
 
         {/* Nav for Large Screens */}
         <nav className="hidden lg:flex space-x-6">
-          <a href="/" className="hover:text-gray-400">
+          <a href="/home" className="hover:text-gray-400">
             Home
           </a>
           <a href="/albums" className="hover:text-gray-400">
