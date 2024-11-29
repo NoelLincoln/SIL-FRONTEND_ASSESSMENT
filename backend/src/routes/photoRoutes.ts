@@ -1,15 +1,18 @@
-import { Router } from "express";
+import express from "express";
 import * as photoController from "../controllers/photoController";
 
-const router = Router();
+const router = express.Router();
 
-// Route to upload an image
-router.post("/upload", photoController.uploadPhoto);
+// Get photos by album ID
+router.get("/album/:albumId", photoController.getPhotosByAlbumId);
 
-// Route to get image colors by public ID
-router.get("/colors/:publicId", photoController.getImageColors);
+// Get a single photo by ID
+router.get("/:id", photoController.getPhotoById);
 
-// Route to create an image tag with transformations
-router.post("/create-tag", photoController.createImageTag);
+// Update a photo title
+router.put("/:id", photoController.updatePhotoTitle);
+
+// Delete a photo
+router.delete("/:id", photoController.deletePhoto);
 
 export default router;

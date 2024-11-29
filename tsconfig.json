@@ -17,7 +17,7 @@
     "client/tailwind.config.ts",
     "client/vite.config.ts",
     "client/vite-env.d.ts"
-  ],
+, "backend/tests/__mocks__"  ],
   "exclude": ["node_modules", "dist"],
   "references": [
     {

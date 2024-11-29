@@ -1,86 +1,83 @@
 import { Request, Response } from "express";
-import * as cloudinaryService from "../services/cloudinaryService";
+import * as photoService from "../services/photoService";
 
-// Upload a photo to Cloudinary and save the URL to the database
-export const uploadPhoto = async (
+/**
+ * Get photos by album ID
+ */
+export const getPhotosByAlbumId = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { albumId, title, imagePath } = req.body; // Assume these are passed in the body
-
-  if (!imagePath || !albumId || !title) {
-    res
-      .status(400)
-      .json({ error: "Image path, album ID, and title are required" });
-    return;
-  }
-
+  const { albumId } = req.params;
   try {
-    const publicId = await cloudinaryService.uploadImage(
-      imagePath,
-      albumId,
-      title,
-    );
+    const photos = await photoService.getPhotosByAlbumId(albumId);
+    res.status(200).json(photos);
+  } catch (error) {
+    console.error("Error fetching photos:", error);
+    res.status(500).json({ error: "Failed to fetch photos" });
+  }
+};
 
-    if (publicId) {
-      res
-        .status(200)
-        .json({ message: "Photo uploaded and saved successfully", publicId });
-    } else {
-      res.status(500).json({ error: "Failed to upload and save photo" });
+/**
+ * Get a photo by ID
+ */
+export const getPhotoById = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const { id } = req.params;
+  try {
+    const photo = await photoService.getPhotoById(id);
+    if (!photo) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
     }
+    res.status(200).json(photo);
   } catch (error) {
-    console.error("Error uploading and saving photo:", error);
-    res.status(500).json({ error: "Failed to upload and save photo" });
+    console.error("Error fetching photo:", error);
+    res.status(500).json({ error: "Failed to fetch photo" });
   }
 };
 
-// Get colors from an uploaded image
-export const getImageColors = async (
+/**
+ * Update photo title
+ */
+export const updatePhotoTitle = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { publicId } = req.params;
-
-  if (!publicId) {
-    res.status(400).json({ error: "Public ID is required" });
-    return;
-  }
-
+  const { id } = req.params;
+  const { title } = req.body;
   try {
-    const colors = await cloudinaryService.getAssetInfo(publicId);
-    res.status(200).json({ colors });
+    const updatedPhoto = await photoService.updatePhotoTitle(id, title);
+    if (!updatedPhoto) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
+    }
+    res.status(200).json(updatedPhoto);
   } catch (error) {
-    console.error("Error getting image colors:", error);
-    res.status(500).json({ error: "Failed to get image colors" });
+    console.error("Error updating photo title:", error);
+    res.status(500).json({ error: "Failed to update photo title" });
   }
 };
 
-// Create an image tag with transformations
-export const createImageTag = async (
+/**
+ * Delete a photo by ID
+ */
+export const deletePhoto = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { publicId, effectColor, backgroundColor } = req.body;
-
-  if (!publicId || !effectColor || !backgroundColor) {
-    res
-      .status(400)
-      .json({
-        error: "Public ID, effect color, and background color are required",
-      });
-    return;
-  }
-
+  const { id } = req.params;
   try {
-    const imageTag = cloudinaryService.createImageTag(
-      publicId,
-      effectColor,
-      backgroundColor,
-    );
-    res.status(200).json({ imageTag });
+    const deletedPhoto = await photoService.deletePhoto(id);
+    if (!deletedPhoto) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
+    }
+    res.status(200).json({ message: "Photo deleted successfully" });
   } catch (error) {
-    console.error("Error creating image tag:", error);
-    res.status(500).json({ error: "Failed to create image tag" });
+    console.error("Error deleting photo:", error);
+    res.status(500).json({ error: "Failed to delete photo" });
   }
 };

@@ -4,10 +4,18 @@ import cloudinary from "../config/cloudinaryConfig";
 const prisma = new PrismaClient();
 
 /**
- * Get all albums
+ * Get all albums with username
  */
 export const getAlbums = async (): Promise<Album[]> => {
-  return prisma.album.findMany();
+  return prisma.album.findMany({
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
 };
 
 /**

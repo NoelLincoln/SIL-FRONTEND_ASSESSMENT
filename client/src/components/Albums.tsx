@@ -3,10 +3,17 @@ import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 import Header from "./Header";
 
+interface Photo {
+  id: string;
+  title: string;
+  imageUrl: string;
+}
+
 interface Album {
   id: string;
   title: string;
   userId: string;
+  photos: Photo[]; // Array of Photo objects
 }
 
 const Albums: React.FC = () => {
@@ -19,17 +26,47 @@ const Albums: React.FC = () => {
   const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/albums")
-      .then((response) => {
-        setAlbums(response.data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching albums:", error);
-        setIsLoading(false);
-      });
+    // Fetch albums and their photos
+    const fetchAlbums = async () => {
+      try {
+        const albumResponse = await axios.get(
+          "http://localhost:5000/api/albums",
+        );
+        const albumData: Album[] = albumResponse.data;
 
+        // Fetch photos for each album based on the album id
+        const updatedAlbums = await Promise.all(
+          albumData.map(async (album) => {
+            const photosResponse = await axios.get(
+              `http://localhost:5000/api/photos/album/${album.id}`,
+            );
+            console.log("photo data", photosResponse.data);
+
+            // Map the photos to objects containing id, title, and imageUrl
+            const photos: Photo[] = photosResponse.data.map(
+              (photo: { imageUrl: string; id: string; title: string }) => ({
+                imageUrl: photo.imageUrl,
+                id: photo.id,
+                title: photo.title,
+              }),
+            );
+            console.log("photos obj", photos);
+
+            return { ...album, photos };
+          }),
+        );
+
+        setAlbums(updatedAlbums);
+      } catch (error) {
+        console.error("Error fetching albums or photos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAlbums();
+
+    // Fetch current user details
     axios
       .get("http://localhost:5000/api/auth/me", { withCredentials: true })
       .then((response) => {
@@ -106,14 +143,39 @@ const Albums: React.FC = () => {
             <p className="mt-2">Be the first one to add one!</p>
           </div>
         ) : (
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {albums.map((album) => (
-              <div key={album.id} className="p-4 border-b border-gray-300">
-                <h2 className="font-bold">{album.title}</h2>
-                <p>User ID: {album.userId}</p>
+              <div
+                key={album.id}
+                className="p-4 border border-gray-300 rounded-lg shadow-sm"
+              >
+                <h2 className="font-bold text-lg mb-2">{album.title}</h2>
+                <p className="mb-2 text-sm">
+                  Created by:{" "}
+                  <a
+                    href={`/users/${album.userId}`}
+                    className="text-blue-500 hover:underline"
+                  >
+                    {album.userId}
+                  </a>
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {album.photos && album.photos.length > 0 ? (
+                    album.photos.map((photo, index) => (
+                      <img
+                        key={photo.id} // Use the photo id as the key
+                        src={photo.imageUrl} // Display the image using imageUrl
+                        alt={`Album ${album.title} - ${photo.title}`}
+                        className="w-32 h-32 object-cover rounded"
+                      />
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">No photos available</p>
+                  )}
+                </div>
                 <a
                   href={`/albums/${album.id}`}
-                  className="text-blue-500 hover:underline"
+                  className="text-blue-500 hover:underline mt-4 block"
                 >
                   View Album
                 </a>
