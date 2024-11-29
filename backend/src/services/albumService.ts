@@ -30,15 +30,25 @@ export const getAlbumById = async (id: string): Promise<Album | null> => {
 /**
  * Create a new album
  */
-export const createAlbum = async (data: {
-  title: string;
-  userId: string;
-}): Promise<Album> => {
-  return prisma.album.create({
+/**
+ * Create a new album and fetch the associated user info (including username)
+ */
+export const createAlbum = async (data: { title: string; userId: string }) => {
+  const album = await prisma.album.create({
     data,
   });
-};
 
+  // Fetch the associated user and include the username in the response
+  const user = await prisma.user.findUnique({
+    where: { id: data.userId },
+    select: { username: true },
+  });
+
+  return {
+    ...album,
+    username: user?.username, // Add username to the album response
+  };
+};
 /**
  * Add photos to an album
  */
