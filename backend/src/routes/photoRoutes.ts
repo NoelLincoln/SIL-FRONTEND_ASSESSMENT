@@ -1,18 +1,23 @@
 import express from "express";
 import * as photoController from "../controllers/photoController";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer({ dest: "uploads/" }); // configure multer for file uploads
 
-// Get photos by album ID
-router.get("/album/:albumId", photoController.getPhotosByAlbumId);
+// Create a photo
+router.post("/", upload.single("photo"), photoController.createPhoto);
 
-// Get a single photo by ID
+// Get all photos in an album
+router.get("/albums/:albumId/photos", photoController.getPhotosByAlbumId);
+
+// Get a photo by ID
 router.get("/:id", photoController.getPhotoById);
 
-// Update a photo title
-router.put("/:id", photoController.updatePhotoTitle);
+// Update photo title
+router.patch("/:id", photoController.updatePhotoTitle);
 
-// Delete a photo
+// Delete a photo by ID
 router.delete("/:id", photoController.deletePhoto);
 
 export default router;

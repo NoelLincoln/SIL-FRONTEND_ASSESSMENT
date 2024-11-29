@@ -12,7 +12,7 @@
       "types": ["jest"]
     },
     "include": [
-      "src/**/*", "tests/__mocks__",
+      "src/**/*", "tests/__mocks__","tests/**/*.d.ts"
     ],
     "exclude": [
       "node_modules",
