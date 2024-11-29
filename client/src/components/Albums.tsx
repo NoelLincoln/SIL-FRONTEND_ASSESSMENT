@@ -197,6 +197,69 @@ const Albums: React.FC = () => {
           </div>
         )}
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Add New Album</h2>
+              <button onClick={toggleModal} className="text-red-500">
+                <FaTimes />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="album-title" className="block font-semibold">
+                  Album Title:
+                </label>
+                <input
+                  type="text"
+                  id="album-title"
+                  value={albumTitle}
+                  onChange={(e) => setAlbumTitle(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div>
+                <label htmlFor="album-photos" className="block font-semibold">
+                  Photos (max 3):
+                </label>
+                <input
+                  type="file"
+                  id="album-photos"
+                  multiple
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {photoPreviews.map((preview, index) => (
+                    <img
+                      key={index}
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-4">
+              <button
+                onClick={toggleModal}
+                className="px-4 py-2 bg-gray-400 text-white rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddAlbum}
+                className="px-4 py-2 bg-blue-600 text-white rounded"
+              >
+                Add Album
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
