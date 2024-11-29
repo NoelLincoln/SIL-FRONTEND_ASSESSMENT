@@ -14,7 +14,7 @@ interface Album {
   title: string;
   userId: string;
   photos: Photo[];
-  username?: string; // Optional username field
+  username: string;
 }
 
 const Albums: React.FC = () => {
@@ -25,6 +25,8 @@ const Albums: React.FC = () => {
   const [albumPhotos, setAlbumPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAlbumsAndUsers = async () => {
@@ -46,7 +48,7 @@ const Albums: React.FC = () => {
             acc[user.id] = user.username;
             return acc;
           },
-          {},
+          {} as Record<string, string>,
         );
 
         // Fetch photos and add username to each album
@@ -108,6 +110,7 @@ const Albums: React.FC = () => {
   };
 
   const handleAddAlbum = () => {
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append("title", albumTitle);
     formData.append("userId", userId);
@@ -120,14 +123,53 @@ const Albums: React.FC = () => {
         withCredentials: true,
       })
       .then((response) => {
-        setAlbums([...albums, response.data]);
-        toggleModal();
-        setAlbumTitle("");
-        setAlbumPhotos([]);
-        setPhotoPreviews([]);
+        const newAlbum = response.data;
+
+        // Fetch the username dynamically using the userId (assumed that the user is already authenticated)
+        const username =
+          albums.find((album) => album.userId === userId)?.username ||
+          "Unknown";
+
+        // Immediately fetch the photos for the new album
+        axios
+          .get(`http://localhost:5000/api/photos/albums/${newAlbum.id}`)
+          .then((photosResponse) => {
+            const photos: Photo[] = photosResponse.data.map(
+              (photo: { imageUrl: string; id: string; title: string }) => ({
+                imageUrl: photo.imageUrl,
+                id: photo.id,
+                title: photo.title,
+              }),
+            );
+
+            // Update the new album with the fetched photos and dynamic username
+            const updatedAlbum = {
+              ...newAlbum,
+              photos,
+              username, // Use the dynamic username fetched above
+            };
+
+            setAlbums((prevAlbums) => [updatedAlbum, ...prevAlbums]);
+
+            // Show success toast
+            setToastMessage("Album has been successfully added!");
+            setTimeout(() => setToastMessage(null), 3000); // Clear toast after 3 seconds
+
+            // Close the modal
+            toggleModal();
+            setAlbumTitle("");
+            setAlbumPhotos([]);
+            setPhotoPreviews([]);
+          })
+          .catch((error) => {
+            console.error("Error fetching album photos:", error);
+          });
       })
       .catch((error) => {
         console.error("Error creating album:", error);
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
   };
 
@@ -164,7 +206,7 @@ const Albums: React.FC = () => {
               >
                 <h2 className="font-bold text-lg mb-2">{album.title}</h2>
                 <p className="mb-2 text-sm">
-                  Created by:{" "}
+                  Created by:
                   <a
                     href={`/users/${album.userId}`}
                     className="text-blue-500 hover:underline"
@@ -174,7 +216,7 @@ const Albums: React.FC = () => {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   {album.photos && album.photos.length > 0 ? (
-                    album.photos.map((photo, index) => (
+                    album.photos.map((photo) => (
                       <img
                         key={photo.id}
                         src={photo.imageUrl}
@@ -197,6 +239,14 @@ const Albums: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg">
+          {toastMessage}
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
@@ -206,55 +256,43 @@ const Albums: React.FC = () => {
                 <FaTimes />
               </button>
             </div>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="album-title" className="block font-semibold">
-                  Album Title:
-                </label>
-                <input
-                  type="text"
-                  id="album-title"
-                  value={albumTitle}
-                  onChange={(e) => setAlbumTitle(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
+            <input
+              type="text"
+              placeholder="Album Title"
+              value={albumTitle}
+              onChange={(e) => setAlbumTitle(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              multiple
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <div className="flex flex-wrap gap-2">
+              {photoPreviews.map((preview, index) => (
+                <img
+                  key={index}
+                  src={preview}
+                  alt="Preview"
+                  className="w-24 h-24 object-cover rounded"
                 />
-              </div>
-              <div>
-                <label htmlFor="album-photos" className="block font-semibold">
-                  Photos (max 3):
-                </label>
-                <input
-                  type="file"
-                  id="album-photos"
-                  multiple
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {photoPreviews.map((preview, index) => (
-                    <img
-                      key={index}
-                      src={preview}
-                      alt={`Preview ${index + 1}`}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={toggleModal}
-                className="px-4 py-2 bg-gray-400 text-white rounded"
-              >
-                Cancel
-              </button>
+            <div className="mt-4 flex justify-center">
               <button
                 onClick={handleAddAlbum}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
+                disabled={isSubmitting}
+                className={`px-6 py-2 bg-blue-600 text-white rounded-full ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                Add Album
+                {isSubmitting ? (
+                  <div className="spinner-border animate-spin w-5 h-5 border-4 border-t-4 border-blue-300 rounded-full"></div>
+                ) : (
+                  "Add Album"
+                )}
               </button>
             </div>
           </div>
