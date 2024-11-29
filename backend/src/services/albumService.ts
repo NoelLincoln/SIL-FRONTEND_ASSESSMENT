@@ -1,12 +1,21 @@
 import { PrismaClient, Album } from "@prisma/client";
+import cloudinary from "../config/cloudinaryConfig";
 
 const prisma = new PrismaClient();
 
 /**
- * Get all albums
+ * Get all albums with username
  */
 export const getAlbums = async (): Promise<Album[]> => {
-  return prisma.album.findMany();
+  return prisma.album.findMany({
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
 };
 
 /**
@@ -21,13 +30,43 @@ export const getAlbumById = async (id: string): Promise<Album | null> => {
 /**
  * Create a new album
  */
-export const createAlbum = async (data: {
-  title: string;
-  userId: string;
-}): Promise<Album> => {
-  return prisma.album.create({
+/**
+ * Create a new album and fetch the associated user info (including username)
+ */
+export const createAlbum = async (data: { title: string; userId: string }) => {
+  const album = await prisma.album.create({
     data,
   });
+
+  // Fetch the associated user and include the username in the response
+  const user = await prisma.user.findUnique({
+    where: { id: data.userId },
+    select: { username: true },
+  });
+
+  return {
+    ...album,
+    username: user?.username, // Add username to the album response
+  };
+};
+/**
+ * Add photos to an album
+ */
+export const addPhotosToAlbum = async (
+  albumId: string,
+  photoUrls: string[],
+): Promise<void> => {
+  await Promise.all(
+    photoUrls.map((url) =>
+      prisma.photo.create({
+        data: {
+          title: "Photo",
+          imageUrl: url,
+          albumId,
+        },
+      }),
+    ),
+  );
 };
 
 /**

@@ -1,86 +1,144 @@
 import { Request, Response } from "express";
-import * as cloudinaryService from "../services/cloudinaryService";
+import * as photoService from "../services/photoService";
+import cloudinary from "../config/cloudinaryConfig";
 
-// Upload a photo to Cloudinary and save the URL to the database
-export const uploadPhoto = async (
+/**
+ * Create a new photo (uploads to Cloudinary)
+ */
+export const createPhoto = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { albumId, title, imagePath } = req.body; // Assume these are passed in the body
+  const { albumId, title } = req.body;
+  const file = req.file as Express.Multer.File;
 
-  if (!imagePath || !albumId || !title) {
-    res
-      .status(400)
-      .json({ error: "Image path, album ID, and title are required" });
+  if (!file) {
+    res.status(400).json({ error: "No photo file provided" });
     return;
   }
 
   try {
-    const publicId = await cloudinaryService.uploadImage(
-      imagePath,
+    // Upload photo to Cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "photos",
+    });
+
+    // Save photo data to the database
+    const newPhoto = await photoService.createPhoto({
       albumId,
       title,
-    );
+      imageUrl: result.secure_url,
+    });
 
-    if (publicId) {
-      res
-        .status(200)
-        .json({ message: "Photo uploaded and saved successfully", publicId });
+    res.status(201).json(newPhoto);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error creating photo:", error.message);
+      res.status(500).json({ error: "Failed to create photo" });
     } else {
-      res.status(500).json({ error: "Failed to upload and save photo" });
+      console.error("Unknown error:", error);
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
-  } catch (error) {
-    console.error("Error uploading and saving photo:", error);
-    res.status(500).json({ error: "Failed to upload and save photo" });
   }
 };
 
-// Get colors from an uploaded image
-export const getImageColors = async (
+/**
+ * Get all photos by album ID
+ */
+export const getPhotosByAlbumId = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { publicId } = req.params;
-
-  if (!publicId) {
-    res.status(400).json({ error: "Public ID is required" });
-    return;
-  }
-
+  const { albumId } = req.params;
   try {
-    const colors = await cloudinaryService.getAssetInfo(publicId);
-    res.status(200).json({ colors });
-  } catch (error) {
-    console.error("Error getting image colors:", error);
-    res.status(500).json({ error: "Failed to get image colors" });
+    const photos = await photoService.getPhotosByAlbumId(albumId);
+    res.status(200).json(photos);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error fetching photos:", error.message);
+      res.status(500).json({ error: "Failed to fetch photos" });
+    } else {
+      console.error("Unknown error:", error);
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
   }
 };
 
-// Create an image tag with transformations
-export const createImageTag = async (
+/**
+ * Get a photo by ID
+ */
+export const getPhotoById = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { publicId, effectColor, backgroundColor } = req.body;
-
-  if (!publicId || !effectColor || !backgroundColor) {
-    res
-      .status(400)
-      .json({
-        error: "Public ID, effect color, and background color are required",
-      });
-    return;
-  }
-
+  const { id } = req.params;
   try {
-    const imageTag = cloudinaryService.createImageTag(
-      publicId,
-      effectColor,
-      backgroundColor,
-    );
-    res.status(200).json({ imageTag });
-  } catch (error) {
-    console.error("Error creating image tag:", error);
-    res.status(500).json({ error: "Failed to create image tag" });
+    const photo = await photoService.getPhotoById(id);
+    if (!photo) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
+    }
+    res.status(200).json(photo);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error fetching photo:", error.message);
+      res.status(500).json({ error: "Failed to fetch photo" });
+    } else {
+      console.error("Unknown error:", error);
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
+};
+
+/**
+ * Update photo title
+ */
+export const updatePhotoTitle = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const { id } = req.params;
+  const { title } = req.body;
+  try {
+    const updatedPhoto = await photoService.updatePhotoTitle(id, title);
+    if (!updatedPhoto) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
+    }
+    res.status(200).json(updatedPhoto);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error updating photo title:", error.message);
+      res.status(500).json({ error: "Failed to update photo title" });
+    } else {
+      console.error("Unknown error:", error);
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
+};
+
+/**
+ * Delete a photo by ID
+ */
+export const deletePhoto = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const { id } = req.params;
+  try {
+    const deletedPhoto = await photoService.deletePhoto(id);
+    if (!deletedPhoto) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
+    }
+    res.status(200).json({ message: "Photo deleted successfully" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error deleting photo:", error.message);
+      res.status(500).json({ error: "Failed to delete photo" });
+    } else {
+      console.error("Unknown error:", error);
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
   }
 };

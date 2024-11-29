@@ -22,7 +22,7 @@ model Album {
   id        String   @id @default(uuid())
   title     String
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   photos    Photo[]
 }
 
@@ -31,5 +31,5 @@ model Photo {
   title     String
   imageUrl  String
   albumId   String
-  album     Album    @relation(fields: [albumId], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
 }

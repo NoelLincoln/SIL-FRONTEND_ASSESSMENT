@@ -23,8 +23,7 @@ describe("User Routes", () => {
 
   // Close the server and clean up the test data after all tests
   afterAll(async () => {
-    // Clean up users and close server
-    await prisma.user.deleteMany();
+    await prisma.user.deleteMany(); // Cascade should handle deleting related albums
     server.close(() => {});
   });
 
@@ -38,9 +37,9 @@ describe("User Routes", () => {
   // Test POST /api/users
   it("should create a new user", async () => {
     const newUser = {
-      githubId: "271222548", // Change the githubId to ensure uniqueness
-      username: "newuserthree",
-      email: "newuserthree@example.com",
+      githubId: "27122548", // Ensure unique githubId
+      username: `newuser${Date.now()}`, // Ensure unique username
+      email: `newuser${Date.now()}@example.com`, // Ensure unique email
       name: "New User Three",
     };
 
