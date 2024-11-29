@@ -14,7 +14,7 @@ interface Album {
   title: string;
   userId: string;
   photos: Photo[];
-  username: string;
+  username: string; // Add username here
 }
 
 const Albums: React.FC = () => {
@@ -25,6 +25,7 @@ const Albums: React.FC = () => {
   const [albumPhotos, setAlbumPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>("");
+  const [username, setUsername] = useState<string>(""); // Store username here
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -37,7 +38,7 @@ const Albums: React.FC = () => {
         ]);
 
         const albumData: Album[] = albumResponse.data;
-        const userData = userResponse.data; // Assuming it returns an array of users
+        const userData = userResponse.data;
 
         // Create a mapping of userId to username
         const userMap = userData.reduce(
@@ -57,6 +58,7 @@ const Albums: React.FC = () => {
             const photosResponse = await axios.get(
               `http://localhost:5000/api/photos/albums/${album.id}`,
             );
+            console.log("Photos Response:", photosResponse.data);
             const photos: Photo[] = photosResponse.data.map(
               (photo: { imageUrl: string; id: string; title: string }) => ({
                 imageUrl: photo.imageUrl,
@@ -88,6 +90,7 @@ const Albums: React.FC = () => {
       .get("http://localhost:5000/api/auth/me", { withCredentials: true })
       .then((response) => {
         setUserId(response.data.id);
+        setUsername(response.data.username); // Set username on login
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);
@@ -125,11 +128,6 @@ const Albums: React.FC = () => {
       .then((response) => {
         const newAlbum = response.data;
 
-        // Fetch the username dynamically using the userId (assumed that the user is already authenticated)
-        const username =
-          albums.find((album) => album.userId === userId)?.username ||
-          "Unknown";
-
         // Immediately fetch the photos for the new album
         axios
           .get(`http://localhost:5000/api/photos/albums/${newAlbum.id}`)
@@ -142,11 +140,11 @@ const Albums: React.FC = () => {
               }),
             );
 
-            // Update the new album with the fetched photos and dynamic username
+            // Update the new album with the fetched photos and username
             const updatedAlbum = {
               ...newAlbum,
               photos,
-              username, // Use the dynamic username fetched above
+              username: username, // Use the dynamically fetched username
             };
 
             setAlbums((prevAlbums) => [updatedAlbum, ...prevAlbums]);
@@ -206,12 +204,12 @@ const Albums: React.FC = () => {
               >
                 <h2 className="font-bold text-lg mb-2">{album.title}</h2>
                 <p className="mb-2 text-sm">
-                  Created by:
+                  Created by: {album.username}
                   <a
                     href={`/users/${album.userId}`}
                     className="text-blue-500 hover:underline"
                   >
-                    {album.username}
+                     {/* Correctly showing username */}
                   </a>
                 </p>
                 <div className="flex flex-wrap gap-4">
@@ -249,10 +247,13 @@ const Albums: React.FC = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Add New Album</h2>
-              <button onClick={toggleModal} className="text-red-500">
+              <h2 className="text-xl font-semibold">Add New Album</h2>
+              <button
+                onClick={toggleModal}
+                className="text-red-500 hover:text-red-700"
+              >
                 <FaTimes />
               </button>
             </div>
@@ -261,16 +262,16 @@ const Albums: React.FC = () => {
               placeholder="Album Title"
               value={albumTitle}
               onChange={(e) => setAlbumTitle(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full px-4 py-2 border rounded mb-4"
             />
             <input
               type="file"
+              multiple
               accept="image/*"
               onChange={handlePhotoChange}
-              multiple
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full mb-4"
             />
-            <div className="flex flex-wrap gap-2">
+            <div className="mb-4 flex gap-4">
               {photoPreviews.map((preview, index) => (
                 <img
                   key={index}
@@ -280,21 +281,15 @@ const Albums: React.FC = () => {
                 />
               ))}
             </div>
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={handleAddAlbum}
-                disabled={isSubmitting}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-full ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {isSubmitting ? (
-                  <div className="spinner-border animate-spin w-5 h-5 border-4 border-t-4 border-blue-300 rounded-full"></div>
-                ) : (
-                  "Add Album"
-                )}
-              </button>
-            </div>
+            <button
+              onClick={handleAddAlbum}
+              className={`w-full py-2 bg-blue-600 text-white rounded-full ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Adding..." : "Add Album"}
+            </button>
           </div>
         </div>
       )}
