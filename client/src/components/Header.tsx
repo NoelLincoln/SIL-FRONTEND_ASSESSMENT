@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
-import axios from "axios"; // Import Axios for making API requests
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store"; // Adjust path based on your project structure
+import { logoutUser, fetchAuthUser } from "../redux/reducers/authSlice"; // Import your async actions
+import { AppDispatch } from "../redux/store"; // Import AppDispatch type
+import axios from "axios";
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null); // Default to null until we fetch the email
 
-  // Fetch user email on component mount
-  useEffect(() => {
-    // Call the /api/auth/me route to get the logged-in user's email
-    axios
-      .get("http://localhost:5000/api/auth/me", { withCredentials: true }) // Adjust URL to your backend
-      .then((response) => {
-        setUserEmail(response.data.email); // Set the email state
-        console.log("User Id:", response.data.userId);
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-        setUserEmail(null); // Handle error (user might not be logged in)
-      });
-  }, []); // Empty dependency array to run once when component mounts
+  // Access the user email, authentication state, and loading/error from Redux
+  const { email, isAuthenticated, loading, error } = useSelector(
+    (state: RootState) => state.auth,
+  );
+
+  const dispatch = useDispatch<AppDispatch>(); // Type the dispatch with AppDispatch
 
   // Toggle nav menu
   const toggleNav = () => {
@@ -42,6 +37,24 @@ const Header: React.FC = () => {
     if (isProfileOpen) setIsProfileOpen(false);
   };
 
+  // Logout user by dispatching the async logoutUser action
+  const handleLogout = async () => {
+    try {
+      // Dispatch the logoutUser action to perform logout API call
+      await dispatch(logoutUser());
+      // Optionally, redirect to the login page or home page after logout
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      // If the user is not authenticated and there's no loading, perform the API call to fetch user data
+      dispatch(fetchAuthUser());
+    }
+  }, [dispatch, isAuthenticated, loading]);
+
   return (
     <header className="bg-gray-800 text-white py-4">
       <div className="container mx-auto flex items-center justify-between px-6">
@@ -59,29 +72,33 @@ const Header: React.FC = () => {
           <a href="/add-album" className="hover:text-gray-400">
             Add Album
           </a>
-          <div className="relative">
-            <button
-              onClick={toggleProfile}
-              className="flex items-center space-x-2 hover:text-gray-400"
-            >
-              <FaUserCircle size={24} />
-              <span>Profile</span>
-            </button>
-            {isProfileOpen && (
-              <div
-                className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
-                onClick={(e) => e.stopPropagation()}
+          {isAuthenticated && (
+            <div className="relative">
+              <button
+                onClick={toggleProfile}
+                className="flex items-center space-x-2 hover:text-gray-400"
               >
-                <p>{userEmail ? userEmail : "Loading..."}</p>
-                <button
-                  className="text-red-500 mt-2"
-                  onClick={() => console.log("Logging out...")}
+                <FaUserCircle size={24} />
+                <span>Profile</span>
+              </button>
+              {isProfileOpen && (
+                <div
+                  className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+                  <p>{email || "Loading..."}</p>
+                  <button
+                    className="text-red-500 mt-2"
+                    onClick={handleLogout}
+                    disabled={loading} // Disable the logout button if loading
+                  >
+                    {loading ? "Logging out..." : "Logout"}
+                  </button>
+                  {error && <p className="text-red-500 mt-2">{error}</p>}
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         {/* Hamburger Menu Icon for Small Screens */}
@@ -124,29 +141,33 @@ const Header: React.FC = () => {
             >
               Add Album
             </a>
-            <div className="relative">
-              <button
-                onClick={toggleProfile}
-                className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
-              >
-                <FaUserCircle size={24} />
-                <span>Profile</span>
-              </button>
-              {isProfileOpen && (
-                <div
-                  className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
-                  onClick={(e) => e.stopPropagation()}
+            {isAuthenticated && (
+              <div className="relative">
+                <button
+                  onClick={toggleProfile}
+                  className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
                 >
-                  <p>{userEmail ? userEmail : "Loading..."}</p>
-                  <button
-                    className="text-red-500 mt-2"
-                    onClick={() => console.log("Logging out...")}
+                  <FaUserCircle size={24} />
+                  <span>Profile</span>
+                </button>
+                {isProfileOpen && (
+                  <div
+                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+                    <p>{email || "Loading..."}</p>
+                    <button
+                      className="text-red-500 mt-2"
+                      onClick={handleLogout}
+                      disabled={loading} // Disable the logout button if loading
+                    >
+                      {loading ? "Logging out..." : "Logout"}
+                    </button>
+                    {error && <p className="text-red-500 mt-2">{error}</p>}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
