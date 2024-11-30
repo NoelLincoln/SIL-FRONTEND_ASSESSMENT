@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store"; // Adjust path based on your project structure
-import { logoutUser, fetchAuthUser } from "../redux/reducers/authSlice"; // Import your async actions
+import { RootState } from "../redux/store"; 
+import { logoutUser, fetchAuthUser } from "../redux/reducers/authSlice";
 import { AppDispatch } from "../redux/store"; // Import AppDispatch type
-import axios from "axios";
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -15,7 +14,7 @@ const Header: React.FC = () => {
     (state: RootState) => state.auth,
   );
 
-  const dispatch = useDispatch<AppDispatch>(); // Type the dispatch with AppDispatch
+  const dispatch = useDispatch<AppDispatch>();
 
   // Toggle nav menu
   const toggleNav = () => {
