@@ -1,7 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// Define the User type
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  // Add other properties as needed
+}
+
 interface UserState {
-  users: any[];
+  users: User[]; // Now correctly typed as an array of User objects
   loading: boolean;
   error: string | null;
 }
@@ -13,7 +21,7 @@ const initialState: UserState = {
 };
 
 // Async thunk to fetch users
-export const fetchUsers = createAsyncThunk(
+export const fetchUsers = createAsyncThunk<User[], void, { rejectValue: string }>(
   "users/fetchUsers",
   async (_, { rejectWithValue }) => {
     try {
@@ -24,11 +32,11 @@ export const fetchUsers = createAsyncThunk(
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      return await response.json();
+      return await response.json(); // Return the array of users
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.message); // Provide the error message if the request fails
     }
-  },
+  }
 );
 
 const usersSlice = createSlice({
@@ -43,7 +51,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload;
+        state.users = action.payload; // Payload is now properly typed as User[]
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
