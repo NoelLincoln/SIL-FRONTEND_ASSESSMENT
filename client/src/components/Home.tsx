@@ -1,67 +1,42 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchUsers } from "../redux/reducers/userSlice";
+import { fetchAlbums } from "../redux/reducers/albumSlice";
+import { RootState, AppDispatch } from "../redux/store";
 import Header from "./Header";
 import UserCard from "./UserCard";
 
 const Home: React.FC = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [albums, setAlbums] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
 
-  // Fetch users and albums
+  const {
+    users,
+    loading: usersLoading,
+    error: usersError,
+  } = useSelector((state: RootState) => state.users);
+  const {
+    albums,
+    loading: albumsLoading,
+    error: albumsError,
+  } = useSelector((state: RootState) => state.albums);
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/users", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch users");
-        }
-        const usersData = await response.json();
-        setUsers(usersData);
-        setLoading(false); // Set loading to false after data is fetched
-      } catch (err: any) {
-        setError("Error fetching users");
-        setLoading(false);
-      }
-    };
+    dispatch(fetchUsers());
+    dispatch(fetchAlbums());
+  }, [dispatch]);
 
-    const fetchAlbums = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/albums", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch albums");
-        }
-        const albumsData = await response.json();
-        setAlbums(albumsData);
-      } catch (err: any) {
-        setError("Error fetching albums");
-      }
-    };
-
-    fetchUsers();
-    fetchAlbums();
-  }, []);
-
-  // Use useCallback to avoid unnecessary re-renders
   const getUserAlbumCount = useCallback(
-    (userId: string) => {
-      return albums.filter((album: any) => album.userId === userId).length;
-    },
-    [albums], // Only re-run the function if albums change
+    (userId: string) =>
+      albums.filter((album) => album.userId === userId).length,
+    [albums],
   );
 
-  if (loading) {
+  if (usersLoading || albumsLoading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>{error}</div>;
+  if (usersError || albumsError) {
+    return <div>Error: {usersError || albumsError}</div>;
   }
 
   return (
