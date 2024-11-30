@@ -1,19 +1,15 @@
 import React from "react";
 
+const getBackendUrl = (): string =>
+  process.env.NODE_ENV === "production"
+    ? "https://sil-backend-production.onrender.com/api/auth/github"
+    : "http://localhost:5000/api/auth/github";
+
 const LandingPage: React.FC = () => {
-  const backendUrl =
-    process.env.NODE_ENV === "production"
-      ? "https://sil-backend-production.onrender.com/api/auth/github"
-      : "http://localhost:5000/api/auth/github";
+  const backendUrl = getBackendUrl();
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/images/background-image-auth.jpg')",
-      }}
-    >
-      {/* Container for the content */}
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-[url('/images/background-image-auth.jpg')]">
       <div className="flex flex-col items-center w-full max-w-md bg-white bg-opacity-90 rounded-lg shadow-xl p-6 sm:p-8 mx-4 sm:mx-auto">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-4">
           Welcome to SIL
