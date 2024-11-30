@@ -1,4 +1,3 @@
-// src/App.tsx
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
@@ -12,9 +11,30 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <ProtectedRoute path="/home" element={<Home />} />
-        <ProtectedRoute path="/users/:userId" element={<UserDetails />} />
-        <ProtectedRoute path="/albums" element={<AllAlbums />} />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users/:userId"
+          element={
+            <ProtectedRoute>
+              <UserDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/albums"
+          element={
+            <ProtectedRoute>
+              <AllAlbums />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

@@ -1,9 +1,9 @@
 // src/components/ProtectedRoute.tsx
 import React, { useEffect, useState } from "react";
-import { Route, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import axios from "axios";
 
-const ProtectedRoute = ({ element: Component, ...rest }: any) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -27,12 +27,7 @@ const ProtectedRoute = ({ element: Component, ...rest }: any) => {
     return <div>Loading...</div>; // Or a loading spinner
   }
 
-  return (
-    <Route
-      {...rest}
-      element={isAuthenticated ? <Component /> : <Navigate to="/" />}
-    />
-  );
+  return isAuthenticated ? <>{children}</> : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;
