@@ -96,7 +96,6 @@ const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
 
   return (
     <>
-      <Header />
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
           <button

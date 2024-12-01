@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import Header from "./Header";
 import LoadingSpinner from "./LoadingSpinner";
 import {
   fetchUserDetails,
@@ -55,7 +54,6 @@ const UserDetails: React.FC = () => {
 
   return (
     <>
-      <Header />
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">User Details</h1>
 

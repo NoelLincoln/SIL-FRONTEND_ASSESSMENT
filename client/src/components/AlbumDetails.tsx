@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom"; // Import Link from react-router-dom
 import { useDispatch, useSelector } from "react-redux";
-import LoadingSpinner from "./LoadingSpinner"; // Assuming LoadingSpinner is a component to show loading state
-import { fetchAlbums } from "../redux/reducers/albumSlice"; // Assuming the albumSlice is in this path
+import LoadingSpinner from "./LoadingSpinner";
+import { fetchAlbums } from "../redux/reducers/albumSlice";
 import { AppDispatch } from "../redux/store";
 
 const AlbumDetails: React.FC = () => {
@@ -60,7 +60,7 @@ const AlbumDetails: React.FC = () => {
         <p className="text-lg text-gray-600 mb-4">
           Created by:{" "}
           <Link
-            to={`/users/${album.userId}`} // Assuming album.userId exists and corresponds to the user route
+            to={`/users/${album.userId}`}
             className="text-blue-600 hover:underline"
           >
             {album.username}
@@ -80,6 +80,13 @@ const AlbumDetails: React.FC = () => {
                   className="w-full h-40 object-cover rounded-md mb-4"
                 />
                 <h4 className="text-lg font-semibold text-gray-700">{photo.title}</h4>
+                <div className="flex justify-between items-center mt-4">
+                  <span className="text-blue-600">
+                    <Link to={`/photos/edit/${photo.id}`} className="hover:underline">
+                      Edit Photo Title
+                    </Link>
+                  </span>
+                </div>
               </div>
             ))
           ) : (
