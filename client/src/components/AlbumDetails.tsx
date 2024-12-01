@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom"; // Import Link from react-router-dom
 import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "./LoadingSpinner"; // Assuming LoadingSpinner is a component to show loading state
 import { fetchAlbums } from "../redux/reducers/albumSlice"; // Assuming the albumSlice is in this path
@@ -58,7 +58,13 @@ const AlbumDetails: React.FC = () => {
           Album: <span className="text-blue-600">{album.title}</span>
         </h2>
         <p className="text-lg text-gray-600 mb-4">
-          Created by: <span className="text-blue-600">{album.username}</span>
+          Created by:{" "}
+          <Link
+            to={`/users/${album.userId}`} // Assuming album.userId exists and corresponds to the user route
+            className="text-blue-600 hover:underline"
+          >
+            {album.username}
+          </Link>
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

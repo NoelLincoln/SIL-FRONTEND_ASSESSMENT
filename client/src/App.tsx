@@ -1,3 +1,4 @@
+// App.tsx
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +10,8 @@ import UserDetails from "./components/UserDetails";
 import Albums from "./components/Albums";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { RootState, AppDispatch } from "./redux/store";
+import AlbumDetails from "./components/AlbumDetails";
+import Layout from "./components/Layout"; // Import Layout
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -25,12 +28,17 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Landing page doesn't need the layout */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Wrap other routes with the Layout component */}
         <Route
           path="/home"
           element={
             <ProtectedRoute>
-              <Home />
+              <Layout>
+                <Home />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -38,7 +46,9 @@ const App: React.FC = () => {
           path="/users/:userId"
           element={
             <ProtectedRoute>
-              <UserDetails />
+              <Layout>
+                <UserDetails />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -46,7 +56,9 @@ const App: React.FC = () => {
           path="/albums/:albumId"
           element={
             <ProtectedRoute>
-              <UserDetails />
+              <Layout>
+                <AlbumDetails />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -54,7 +66,9 @@ const App: React.FC = () => {
           path="/albums"
           element={
             <ProtectedRoute>
-              <Albums albums={albums} loading={loading} error={error} />
+              <Layout>
+                <Albums albums={albums} loading={loading} error={error} />
+              </Layout>
             </ProtectedRoute>
           }
         />
