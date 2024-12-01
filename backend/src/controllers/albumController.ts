@@ -40,9 +40,6 @@ export const getAlbumById = async (
 /**
  * Create a new album
  */
-/**
- * Create a new album
- */
 export const createAlbum = async (
   req: Request,
   res: Response,

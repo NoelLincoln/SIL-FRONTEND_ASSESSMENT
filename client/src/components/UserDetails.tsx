@@ -12,10 +12,11 @@ import { AppDispatch } from "../redux/store";
 
 const UserDetails: React.FC = () => {
   const { userId } = useParams();
-  const dispatch = useDispatch<AppDispatch>(); // Use AppDispatch for typing
+  const dispatch = useDispatch<AppDispatch>();
   const { userDetails, userAlbums, albumPhotos, loading, error, imageLoading } =
     useSelector((state: any) => state.users);
 
+  // Fetch user details and albums when userId changes
   useEffect(() => {
     if (userId) {
       dispatch(fetchUserDetails(userId));
@@ -23,16 +24,19 @@ const UserDetails: React.FC = () => {
     }
   }, [dispatch, userId]);
 
+  // Fetch album photos once albums are available
   useEffect(() => {
-    if (userAlbums.length > 0) {
-      dispatch(fetchAlbumPhotos(userId!));
+    if (userId && userAlbums.length > 0) {
+      dispatch(fetchAlbumPhotos(userId));
     }
   }, [dispatch, userId, userAlbums]);
 
-  if (loading) {
+  // Show loading spinner while any data is loading
+  if (loading || imageLoading) {
     return <LoadingSpinner />;
   }
 
+  // Show error if something went wrong during fetching
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">

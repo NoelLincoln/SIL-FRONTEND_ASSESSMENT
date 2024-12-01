@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// Types for the state and API responses
 interface User {
   id: string;
   username: string;
@@ -47,7 +48,7 @@ export const fetchUsers = createAsyncThunk<
     }
     return await response.json();
   } catch (err: any) {
-    return rejectWithValue(err.message);
+    return rejectWithValue(err.message || "An unknown error occurred.");
   }
 });
 
@@ -67,7 +68,7 @@ export const fetchUserDetails = createAsyncThunk<
     }
     return await response.json();
   } catch (err: any) {
-    return rejectWithValue(err.message);
+    return rejectWithValue(err.message || "An unknown error occurred.");
   }
 });
 
@@ -83,14 +84,14 @@ export const fetchUserAlbums = createAsyncThunk<
       {
         method: "GET",
         credentials: "include",
-      },
+      }
     );
     if (!response.ok) {
       throw new Error("Failed to fetch albums");
     }
     return await response.json();
   } catch (err: any) {
-    return rejectWithValue(err.message);
+    return rejectWithValue(err.message || "An unknown error occurred.");
   }
 });
 
@@ -106,27 +107,39 @@ export const fetchAlbumPhotos = createAsyncThunk<
       {
         method: "GET",
         credentials: "include",
-      },
+      }
     );
-    const albumsData = await albumsResponse.json();
 
-    const photos: Record<string, string> = {};
-    for (const album of albumsData) {
+    if (!albumsResponse.ok) {
+      throw new Error("Failed to fetch user albums");
+    }
+
+    const albums = await albumsResponse.json();
+
+    const photoFetches = albums.map(async (album: Album) => {
       const photosResponse = await fetch(
         `http://localhost:5000/api/photos/albums/${album.id}`,
-        { method: "GET", credentials: "include" },
+        { method: "GET", credentials: "include" }
       );
+
       if (!photosResponse.ok) {
         throw new Error(`Failed to fetch photos for album ${album.id}`);
       }
+
       const photosData = await photosResponse.json();
-      const randomPhoto =
-        photosData[Math.floor(Math.random() * photosData.length)];
-      photos[album.id] = randomPhoto ? randomPhoto.imageUrl : "";
-    }
+      const randomPhoto = photosData[Math.floor(Math.random() * photosData.length)];
+      return { albumId: album.id, imageUrl: randomPhoto ? randomPhoto.imageUrl : "" };
+    });
+
+    const photosArray = await Promise.all(photoFetches);
+    const photos = photosArray.reduce((acc, { albumId, imageUrl }) => {
+      acc[albumId] = imageUrl;
+      return acc;
+    }, {} as Record<string, string>);
+
     return photos;
   } catch (err: any) {
-    return rejectWithValue(err.message);
+    return rejectWithValue(err.message || "An unknown error occurred.");
   }
 });
 
@@ -146,7 +159,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || "Failed to fetch users.";
       })
       .addCase(fetchUserDetails.pending, (state) => {
         state.loading = true;
@@ -159,7 +172,8 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUserDetails.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.userDetails = null;
+        state.error = action.payload || "Failed to fetch user details.";
       })
       .addCase(fetchUserAlbums.pending, (state) => {
         state.loading = true;
@@ -172,18 +186,21 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUserAlbums.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.userAlbums = [];
+        state.error = action.payload || "Failed to fetch user albums.";
       })
       .addCase(fetchAlbumPhotos.pending, (state) => {
         state.imageLoading = true;
+        state.error = null;
       })
       .addCase(fetchAlbumPhotos.fulfilled, (state, action) => {
-        state.albumPhotos = action.payload;
         state.imageLoading = false;
+        state.albumPhotos = action.payload;
       })
       .addCase(fetchAlbumPhotos.rejected, (state, action) => {
         state.imageLoading = false;
-        state.error = action.payload as string;
+        state.albumPhotos = {};
+        state.error = action.payload || "Failed to fetch album photos.";
       });
   },
 });

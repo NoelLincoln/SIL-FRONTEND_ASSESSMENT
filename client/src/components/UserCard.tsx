@@ -1,4 +1,3 @@
-// UserCard.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +17,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, albumCount }) => {
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer bg-white p-6 rounded-lg shadow-lg flex flex-col items-center transition-transform transform hover:scale-105"
+      className="cursor-pointer bg-white p-6 rounded-lg shadow-lg flex flex-col items-center transition-transform transform hover:scale-105 hover:shadow-2xl hover:bg-gray-100"
     >
       <h2 className="text-xl font-semibold mb-2">{user.username}</h2>
       <p className="text-gray-700">Email: {user.email}</p>

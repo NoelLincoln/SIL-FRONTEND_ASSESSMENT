@@ -43,6 +43,14 @@ const App: React.FC = () => {
           }
         />
         <Route
+          path="/albums/:albumId"
+          element={
+            <ProtectedRoute>
+              <UserDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/albums"
           element={
             <ProtectedRoute>
