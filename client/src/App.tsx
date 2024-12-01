@@ -29,49 +29,51 @@ const App: React.FC = () => {
   const { albums, loading, error } = useSelector((state: RootState) => state.albums);
 
   return (
-    <><ToastContainer /><Router>
-      <Routes>
-        {/* Landing page doesn't need the layout */}
-        <Route path="/" element={<LandingPage />} />
+    <>
+      <ToastContainer />
+      <Router>
+        <Routes>
+          {/* Landing page doesn't need the layout */}
+          <Route path="/" element={<LandingPage />} />
 
-        {/* Wrap other routes with the Layout component */}
-        <Route
-          path="/home"
-          element={<ProtectedRoute>
-            <Layout>
-              <Home />
-            </Layout>
-          </ProtectedRoute>} />
-        <Route
-          path="/users/:userId"
-          element={<ProtectedRoute>
-            <Layout>
-              <UserDetails />
-            </Layout>
-          </ProtectedRoute>} />
-        <Route
-          path="/albums/:albumId"
-          element={<ProtectedRoute>
-            <Layout>
-              <AlbumDetails />
-            </Layout>
-          </ProtectedRoute>} />
-        <Route
-          path="/photos/edit/:photoId"
-          element={<ProtectedRoute>
-            <Layout>
-              <EditPhoto />
-            </Layout>
-          </ProtectedRoute>} />
-        <Route
-          path="/albums"
-          element={<ProtectedRoute>
-            <Layout>
-              <Albums albums={albums} loading={loading} error={error} />
-            </Layout>
-          </ProtectedRoute>} />
-      </Routes>
-    </Router></>
+          {/* Wrap other routes with the Layout component */}
+          <Route
+            path="/home"
+            element={<ProtectedRoute>
+              <Layout>
+                <Home />
+              </Layout>
+            </ProtectedRoute>} />
+          <Route
+            path="/users/:userId"
+            element={<ProtectedRoute>
+              <Layout>
+                <UserDetails />
+              </Layout>
+            </ProtectedRoute>} />
+          <Route
+            path="/albums/:albumId"
+            element={<ProtectedRoute>
+              <Layout>
+                <AlbumDetails />
+              </Layout>
+            </ProtectedRoute>} />
+          <Route
+            path="/photos/edit/:photoId"
+            element={<ProtectedRoute>
+              <Layout>
+                <EditPhoto />
+              </Layout>
+            </ProtectedRoute>} />
+          <Route
+            path="/albums"
+            element={<ProtectedRoute>
+              <Layout>
+                <Albums albums={albums} loading={loading} error={error} />
+              </Layout>
+            </ProtectedRoute>} />
+        </Routes>
+      </Router></>
   );
 };
 

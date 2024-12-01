@@ -83,9 +83,7 @@ const Header: React.FC = () => {
           <a href="/albums" className="hover:text-gray-400">
             Albums
           </a>
-          <a href="/add-album" className="hover:text-gray-400">
-            Add Album
-          </a>
+         
           {isAuthenticated && (
             <div className="relative">
               <button
@@ -148,13 +146,7 @@ const Header: React.FC = () => {
             >
               Albums
             </a>
-            <a
-              href="/add-album"
-              className="block text-lg font-medium hover:text-gray-400"
-              onClick={closeNav}
-            >
-              Add Album
-            </a>
+           
             {isAuthenticated && (
               <div className="relative">
                 <button
