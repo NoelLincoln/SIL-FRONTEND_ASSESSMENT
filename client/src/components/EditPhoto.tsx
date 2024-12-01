@@ -1,54 +1,74 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPhotoById, updatePhotoTitle } from "../redux/reducers/photoSlice"; // Adjust the import path
+import { fetchPhotoById, updatePhotoTitle } from "../redux/reducers/photoSlice";
+import { toast } from "react-toastify";
 import { AppDispatch } from "../redux/store";
+import LoadingSpinner from "./LoadingSpinner"
 
 const EditPhoto = () => {
-  const { photoId } = useParams(); // Get the photoId from the URL
-  const navigate = useNavigate();
+  const { photoId } = useParams<{ photoId: string }>();
   const dispatch = useDispatch<AppDispatch>();
 
   const { selectedPhoto, loading, error } = useSelector((state: any) => state.photo);
 
-  const [title, setTitle] = useState<string>(selectedPhoto?.title || "");
-  const [formLoading, setFormLoading] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [updatedTitle, setUpdatedTitle] = useState<string>("");
 
   useEffect(() => {
-    if (!photoId) return;
-
-    dispatch(fetchPhotoById(photoId));
+    if (photoId) {
+      dispatch(fetchPhotoById(photoId)); // Fetch the photo data on load
+    }
   }, [dispatch, photoId]);
 
   useEffect(() => {
     if (selectedPhoto) {
-      setTitle(selectedPhoto.title);
+      setTitle(selectedPhoto.title || "");
+      setUpdatedTitle(selectedPhoto.title || ""); // Initialize updatedTitle with the current photo title
     }
   }, [selectedPhoto]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedPhoto) return;
+    if (!photoId || !title.trim()) return;
 
     try {
-      setFormLoading(true);
+      setIsUpdating(true);
       await dispatch(updatePhotoTitle({ id: photoId, title }));
-      navigate(`/photos/${photoId}`); // Redirect after successful update
+      setUpdatedTitle(title); // Update the displayed title immediately
+      toast.success("Photo title updated successfully!");
     } catch (err) {
       console.error("Error updating photo title", err);
+      toast.error("Failed to update the photo title. Please try again.");
     } finally {
-      setFormLoading(false);
+      setIsUpdating(false);
     }
   };
 
-  if (loading || formLoading) return <p className="text-center text-lg">Loading...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
-  if (!selectedPhoto) return <p className="text-center text-red-500">Photo not found</p>;
+  if (loading) {
+    return (
+      <LoadingSpinner/>
+    );
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
+  }
+
+  if (!selectedPhoto) {
+    return <p className="text-center text-red-500">Photo not found</p>;
+  }
 
   return (
     <div className="container mx-auto p-6 flex justify-center">
       <div className="flex flex-col items-center bg-white shadow-lg rounded-lg p-6 w-full max-w-3xl">
+        {/* Photo name */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Photo name: {updatedTitle}
+        </h2>
+
         {/* Photo preview */}
         <div className="mb-6">
           <img
@@ -62,7 +82,7 @@ const EditPhoto = () => {
         <form onSubmit={handleSubmit} className="w-full">
           <div className="mb-4">
             <label htmlFor="title" className="block text-gray-700 font-medium mb-2">
-              New Title
+              New Photo Name
             </label>
             <input
               type="text"
@@ -70,14 +90,18 @@ const EditPhoto = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter new title"
+              placeholder=""
+              required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition duration-200"
+            disabled={isUpdating}
+            className={`w-full p-3 rounded-lg transition duration-200 ${
+              isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            } text-white`}
           >
-            Update Title
+            {isUpdating ? "Updating title..." : "Update Title"}
           </button>
         </form>
       </div>
