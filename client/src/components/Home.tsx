@@ -5,6 +5,7 @@ import { fetchAlbums } from "../redux/reducers/albumSlice";
 import { RootState, AppDispatch } from "../redux/store";
 import Header from "./Header";
 import UserCard from "./UserCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -31,8 +32,9 @@ const Home: React.FC = () => {
     [albums],
   );
 
+  // Show a single spinner while data or authentication state is loading
   if (usersLoading || albumsLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (usersError || albumsError) {

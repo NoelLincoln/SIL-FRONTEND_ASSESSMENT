@@ -1,4 +1,3 @@
-// src/components/ProtectedRoute.tsx
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
@@ -23,9 +22,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     checkSession();
   }, []);
 
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Or a loading spinner
-  }
+  // Do not show a spinner here, rely on the child component to handle it
+  if (isAuthenticated === null) return null;
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/" />;
 };

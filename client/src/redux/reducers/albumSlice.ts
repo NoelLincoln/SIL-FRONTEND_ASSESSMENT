@@ -34,7 +34,7 @@ export const fetchAlbums = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
 // Async thunk to create a new album
@@ -42,13 +42,13 @@ export const createAlbum = createAsyncThunk(
   "albums/createAlbum",
   async (
     albumData: { title: string; userId: string; files: File[] },
-    { rejectWithValue },
+    { rejectWithValue }
   ) => {
     const formData = new FormData();
     formData.append("title", albumData.title);
     formData.append("userId", albumData.userId);
     albumData.files.forEach((file, index) =>
-      formData.append("files", file, file.name),
+      formData.append("files", file, file.name)
     );
 
     try {
@@ -61,12 +61,15 @@ export const createAlbum = createAsyncThunk(
       if (!response.ok) {
         throw new Error("Failed to create album");
       }
+      // Assume the backend returns the created album, including photo URLs and user info
+      const albumWithUser = await response.json();
 
+      return albumWithUser;
       return await response.json();
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
 // Async thunk to update an album by ID
@@ -91,7 +94,7 @@ export const updateAlbum = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
 // Async thunk to delete an album by ID
@@ -112,7 +115,7 @@ export const deleteAlbum = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
-  },
+  }
 );
 
 const albumsSlice = createSlice({
@@ -155,7 +158,7 @@ const albumsSlice = createSlice({
       .addCase(updateAlbum.fulfilled, (state, action) => {
         state.loading = false;
         const updatedAlbumIndex = state.albums.findIndex(
-          (album) => album.id === action.payload.id,
+          (album) => album.id === action.payload.id
         );
         if (updatedAlbumIndex !== -1) {
           state.albums[updatedAlbumIndex] = action.payload;
@@ -173,7 +176,7 @@ const albumsSlice = createSlice({
       .addCase(deleteAlbum.fulfilled, (state, action) => {
         state.loading = false;
         state.albums = state.albums.filter(
-          (album) => album.id !== action.payload,
+          (album) => album.id !== action.payload
         );
       })
       .addCase(deleteAlbum.rejected, (state, action) => {
