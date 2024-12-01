@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store"; 
+import { RootState } from "../redux/store";
 import { logoutUser, fetchAuthUser } from "../redux/reducers/authSlice";
 import { AppDispatch } from "../redux/store"; // Import AppDispatch type
 
@@ -36,12 +36,16 @@ const Header: React.FC = () => {
     if (isProfileOpen) setIsProfileOpen(false);
   };
 
+    // Go back to the previous page
+    const goBack = () => {
+      window.history.back();
+    };
+
   // Logout user by dispatching the async logoutUser action
   const handleLogout = async () => {
     try {
       // Dispatch the logoutUser action to perform logout API call
       await dispatch(logoutUser());
-      // Optionally, redirect to the login page or home page after logout
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -57,8 +61,19 @@ const Header: React.FC = () => {
   return (
     <header className="bg-gray-800 text-white py-4">
       <div className="container mx-auto flex items-center justify-between px-6">
-        {/* Logo/Brand */}
-        <div className="text-2xl font-semibold">ALBUM GENIE</div>
+        {/* Logo */}
+        <div className="flex items-center text-2xl font-semibold space-x-2">
+          {/* Angle Left Icon - Visible Only on Small Devices */}
+          <div className="flex items-center text-2xl font-semibold space-x-2">
+          {/* Angle Left Icon - Visible Only on Small Devices and Clickable to Go Back */}
+          <FaAngleLeft
+            size={30}
+            className="lg:hidden block cursor-pointer"
+            onClick={goBack}
+          />
+          </div>
+           <span>ALBUM GENIE</span>
+        </div>
 
         {/* Nav for Large Screens */}
         <nav className="hidden lg:flex space-x-6">

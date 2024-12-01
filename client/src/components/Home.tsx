@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import Header from "./Header";
 import UserCard from "./UserCard";
 import LoadingSpinner from "./LoadingSpinner";
 
