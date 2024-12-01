@@ -2,6 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "../store"; // Assuming you have a RootState defined for your store
 
+
+const devUrl = process.env.DEV_URL;
+const prodUrl = process.env.PROD_URL;
+
 interface Photo {
   id: string;
   title: string;
@@ -28,11 +32,12 @@ const initialState: AlbumState = {
   error: null,
 };
 
+
 // Determine the base API URL based on the environment
 const baseUrl =
   process.env.NODE_ENV === "production"
-    ? "https://sil-backend-production.onrender.com/api"
-    : "http://localhost:5000/api";
+    ? prodUrl
+    : devUrl;
 
 // Async thunk to fetch all albums
 export const fetchAlbums = createAsyncThunk(

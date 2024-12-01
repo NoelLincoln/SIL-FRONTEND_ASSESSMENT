@@ -1,12 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const devUrl = process.env.DEV_URL;
+const prodUrl = process.env.PROD_URL;
 // Set base URL based on environment
 const baseUrl =
   process.env.NODE_ENV === "production"
-    ? "https://sil-backend-production.onrender.com/api"
-    : "http://localhost:5000/api";
-
+    ? prodUrl
+    : devUrl;
 // Create an axios instance with the base URL
 const axiosInstance = axios.create({
   baseURL: baseUrl,

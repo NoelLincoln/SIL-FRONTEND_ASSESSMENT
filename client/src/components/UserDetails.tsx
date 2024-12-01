@@ -6,7 +6,7 @@ import {
   fetchUserDetails,
   fetchUserAlbums,
   fetchAlbumPhotos,
-} from "../redux/reducers/userSlice";
+} from "../redux/slices/userSlice";
 import { AppDispatch } from "../redux/store";
 
 const UserDetails: React.FC = () => {

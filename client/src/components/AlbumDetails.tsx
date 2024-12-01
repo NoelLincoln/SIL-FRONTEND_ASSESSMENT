@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom"; // Import Link from react-router-dom
 import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "./LoadingSpinner";
-import { fetchAlbums } from "../redux/reducers/albumSlice";
+import { fetchAlbums } from "../redux/slices/albumSlice
 import { AppDispatch } from "../redux/store";
 
 const AlbumDetails: React.FC = () => {

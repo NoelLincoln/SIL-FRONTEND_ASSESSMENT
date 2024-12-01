@@ -32,6 +32,13 @@ const initialState: UserState = {
   albumPhotos: {},
 };
 
+// Dynamically set base URL based on environment
+const devUrl = process.env.DEV_URL;
+const prodUrl = process.env.PROD_URL;
+
+const baseUrl =
+  process.env.NODE_ENV === "production" ? prodUrl : devUrl;
+
 // Async thunk to fetch users
 export const fetchUsers = createAsyncThunk<
   User[],
@@ -39,7 +46,7 @@ export const fetchUsers = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUsers", async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch("http://localhost:5000/api/users", {
+    const response = await fetch(`${baseUrl}/api/users`, {
       method: "GET",
       credentials: "include",
     });
@@ -59,7 +66,7 @@ export const fetchUserDetails = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUserDetails", async (userId, { rejectWithValue }) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+    const response = await fetch(`${baseUrl}/api/users/${userId}`, {
       method: "GET",
       credentials: "include",
     });
@@ -79,13 +86,10 @@ export const fetchUserAlbums = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUserAlbums", async (userId, { rejectWithValue }) => {
   try {
-    const response = await fetch(
-      `http://localhost:5000/api/albums?userId=${userId}`,
-      {
-        method: "GET",
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`${baseUrl}/api/albums?userId=${userId}`, {
+      method: "GET",
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch albums");
     }
@@ -103,7 +107,7 @@ export const fetchAlbumPhotos = createAsyncThunk<
 >("users/fetchAlbumPhotos", async (userId, { rejectWithValue }) => {
   try {
     const albumsResponse = await fetch(
-      `http://localhost:5000/api/albums?userId=${userId}`,
+      `${baseUrl}/api/albums?userId=${userId}`,
       {
         method: "GET",
         credentials: "include",
@@ -118,7 +122,7 @@ export const fetchAlbumPhotos = createAsyncThunk<
 
     const photoFetches = albums.map(async (album: Album) => {
       const photosResponse = await fetch(
-        `http://localhost:5000/api/photos/albums/${album.id}`,
+        `${baseUrl}/api/photos/albums/${album.id}`,
         { method: "GET", credentials: "include" }
       );
 

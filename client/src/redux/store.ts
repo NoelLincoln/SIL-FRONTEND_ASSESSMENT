@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import usersReducer from "./reducers/userSlice";
-import albumsReducer from "./reducers/albumSlice";
-import authReducer from "./reducers/authSlice";
-import photoReducer from "./reducers/photoSlice";
+import usersReducer from "./slices/userSlice";
+import albumsReducer from "./slices/albumSlice";
+import authReducer from "./slices/authSlice";
+import photoReducer from "./slices/photoSlice";
 
 export const store = configureStore({
   reducer: {
