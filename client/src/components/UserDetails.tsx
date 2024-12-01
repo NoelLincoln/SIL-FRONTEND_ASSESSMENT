@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "./Header";
+import LoadingSpinner from "./LoadingSpinner";
 
 const UserDetails: React.FC = () => {
   const { userId } = useParams(); // Extract userId from the URL
@@ -9,10 +10,12 @@ const UserDetails: React.FC = () => {
   const [albumPhotos, setAlbumPhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
 
   // Fetch user details and albums
   useEffect(() => {
     const fetchUserDetailsAndAlbums = async () => {
+      setLoading(true);
       try {
         // Fetch user details
         const userResponse = await fetch(
@@ -20,7 +23,7 @@ const UserDetails: React.FC = () => {
           {
             method: "GET",
             credentials: "include",
-          },
+          }
         );
         if (!userResponse.ok) {
           throw new Error("Failed to fetch user details");
@@ -34,7 +37,7 @@ const UserDetails: React.FC = () => {
           {
             method: "GET",
             credentials: "include",
-          },
+          }
         );
         if (!albumsResponse.ok) {
           throw new Error("Failed to fetch albums");
@@ -56,6 +59,7 @@ const UserDetails: React.FC = () => {
   // Fetch photos for each album
   useEffect(() => {
     const fetchPhotosForAlbums = async () => {
+      setImageLoading(true);
       const photos: Record<string, string> = {};
 
       for (const album of userAlbums) {
@@ -65,7 +69,7 @@ const UserDetails: React.FC = () => {
             {
               method: "GET",
               credentials: "include",
-            },
+            }
           );
           if (!photosResponse.ok) {
             throw new Error(`Failed to fetch photos for album ${album.id}`);
@@ -82,12 +86,13 @@ const UserDetails: React.FC = () => {
           }
         } catch (err: any) {
           console.error(
-            `Error fetching photos for album ${album.id}: ${err.message}`,
+            `Error fetching photos for album ${album.id}: ${err.message}`
           );
         }
       }
 
       setAlbumPhotos(photos);
+      setImageLoading(false);
     };
 
     if (userAlbums.length > 0) {
@@ -96,11 +101,23 @@ const UserDetails: React.FC = () => {
   }, [userAlbums]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-sm">
+          <img
+            src="/images/server-error-image.png"
+            alt="Error"
+            className="mx-auto mb-4 w-24"
+          />
+          <h2 className="text-2xl font-semibold text-red-500">Oops!</h2>
+          <p className="text-gray-700 mt-2">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -155,9 +172,13 @@ const UserDetails: React.FC = () => {
                       />
                     ) : (
                       <div className="w-full h-40 bg-gray-200 flex items-center justify-center rounded-md mb-2">
-                        <span className="text-gray-500">
-                          No Image Available
-                        </span>
+                        {imageLoading ? (
+                          <LoadingSpinner />
+                        ) : (
+                          <span className="text-gray-500">
+                            No Image Available
+                          </span>
+                        )}
                       </div>
                     )}
                     {/* View Details Button */}
