@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import Header from "./Header";
-import { fetchAlbums, createAlbum } from "../redux/reducers/albumSlice";
-import { fetchAuthUser } from "../redux/reducers/authSlice";
-import { AppDispatch, RootState } from "../redux/store";
+import { createAlbum } from "../redux/reducers/albumSlice";
+import { AppDispatch } from "../redux/store";
+import { useDispatch } from "react-redux";
 
 interface Photo {
   id: string;
@@ -20,12 +19,14 @@ interface Album {
   username: string;
 }
 
-const Albums: React.FC = () => {
+interface AlbumsProps {
+  albums: Album[];
+  loading: boolean;
+  error: string | null;
+}
+
+const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { albums, loading, error } = useSelector((state: RootState) => state.albums);
-  const { id: userId, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [albumTitle, setAlbumTitle] = useState("");
@@ -33,18 +34,6 @@ const Albums: React.FC = () => {
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isAuthenticated && !userId) {
-      dispatch(fetchAuthUser());
-    }
-  }, [dispatch, isAuthenticated, userId]);
-
-  useEffect(() => {
-    if (userId) {
-      dispatch(fetchAlbums());
-    }
-  }, [dispatch, userId]);
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -62,11 +51,6 @@ const Albums: React.FC = () => {
   };
 
   const handleAddAlbum = async () => {
-    if (!userId) {
-      alert("User is not authenticated. Please log in.");
-      return;
-    }
-
     if (!albumTitle) {
       alert("Please provide an album title.");
       return;
@@ -74,17 +58,14 @@ const Albums: React.FC = () => {
 
     setIsSubmitting(true);
 
-    const albumData = { title: albumTitle, userId, files: albumPhotos };
+    const albumData = { title: albumTitle, userId: "user-id-placeholder", files: albumPhotos };
 
     try {
       await dispatch(createAlbum(albumData)).unwrap();
       setToastMessage("Album has been successfully added!");
       setTimeout(() => setToastMessage(null), 3000);
 
-      // Refresh album list after creation
-      dispatch(fetchAlbums());
-
-      // Close the modal after successful album creation
+      // Close the modal and reset fields after successful album creation
       toggleModal();
       setAlbumTitle("");
       setAlbumPhotos([]);
@@ -118,9 +99,7 @@ const Albums: React.FC = () => {
       <Header />
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">
-            {albums.length === 0 ? "No Albums yet 😞" : "All Albums"}
-          </h1>
+          
           <button
             onClick={toggleModal}
             className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
@@ -129,8 +108,12 @@ const Albums: React.FC = () => {
           </button>
         </div>
 
-        {albums.length === 0 ? (
-          <div className="text-center">
+        {loading ? (
+          <div className="flex justify-center items-center mt-6">
+            <div className="w-8 h-8 border-4 border-t-4 border-blue-600 border-solid rounded-full animate-spin"></div>
+          </div>
+        ) : albums.length === 0 ? (
+          <div className="text-center mt-6">
             <p className="mt-2">Be the first one to add one!</p>
           </div>
         ) : (
@@ -207,24 +190,24 @@ const Albums: React.FC = () => {
               onChange={handlePhotoChange}
               className="w-full mb-4"
             />
-            <div className="flex gap-2 mb-4">
-              {photoPreviews.map((preview, index) => (
-                <img
-                  key={index}
-                  src={preview}
-                  alt={`preview-${index}`}
-                  className="w-16 h-16 object-cover rounded"
-                />
-              ))}
-            </div>
+            {photoPreviews.length > 0 && (
+              <div className="flex gap-4 mb-4">
+                {photoPreviews.map((preview, index) => (
+                  <img
+                    key={index}
+                    src={preview}
+                    alt={`Preview ${index}`}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                ))}
+              </div>
+            )}
             <button
               onClick={handleAddAlbum}
               disabled={isSubmitting}
-              className={`w-full py-2 bg-blue-600 text-white rounded flex items-center justify-center ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
-              }`}
+              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
             >
-              {isSubmitting ? "Adding Album..." : "Create Album"}
+              {isSubmitting ? "Submitting..." : "Create Album"}
             </button>
           </div>
         </div>

@@ -1,15 +1,12 @@
-import React, { useEffect, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchUsers } from "../redux/reducers/userSlice";
-import { fetchAlbums } from "../redux/reducers/albumSlice";
-import { RootState, AppDispatch } from "../redux/store";
+import React, { useCallback } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 import Header from "./Header";
 import UserCard from "./UserCard";
 import LoadingSpinner from "./LoadingSpinner";
 
 const Home: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-
+  // Fetch users and albums from the Redux state
   const {
     users,
     loading: usersLoading,
@@ -21,11 +18,7 @@ const Home: React.FC = () => {
     error: albumsError,
   } = useSelector((state: RootState) => state.albums);
 
-  useEffect(() => {
-    dispatch(fetchUsers());
-    dispatch(fetchAlbums());
-  }, [dispatch]);
-
+  // Calculate the number of albums for each user
   const getUserAlbumCount = useCallback(
     (userId: string) =>
       albums.filter((album) => album.userId === userId).length,

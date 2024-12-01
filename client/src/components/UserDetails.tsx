@@ -36,7 +36,7 @@ const UserDetails: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-sm">
+        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full">
           <img
             src="/images/server-error-image.png"
             alt="Error"
@@ -53,29 +53,29 @@ const UserDetails: React.FC = () => {
     <>
       <Header />
       <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">User Details</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">User Details</h1>
 
         <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
           <div className="mb-8">
             {userDetails ? (
-              <h2 className="text-2xl font-semibold">
-                Created By: {userDetails.username}
+              <h2 className="text-2xl font-semibold text-gray-700">
+                Created By: <span className="text-blue-600">{userDetails.username}</span>
               </h2>
             ) : (
-              <div>No user data found</div>
+              <div className="text-gray-500">No user data found</div>
             )}
           </div>
 
           <hr className="my-6 border-t-2 border-gray-200" />
 
           <div>
-            <h3 className="text-xl font-semibold mb-4">Albums</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Albums</h3>
             {userAlbums.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userAlbums.map((album: any) => (
                   <div
                     key={album.id}
-                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow ease-in-out duration-300"
                   >
                     <h4 className="text-lg font-semibold mb-2">
                       <Link
@@ -100,7 +100,7 @@ const UserDetails: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <p>No albums found</p>
+              <p className="text-gray-600">No albums found</p>
             )}
           </div>
         </div>
