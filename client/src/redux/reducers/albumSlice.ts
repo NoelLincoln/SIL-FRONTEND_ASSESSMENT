@@ -1,7 +1,23 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { RootState } from "../store"; // Assuming you have a RootState defined for your store
+
+interface Photo {
+  id: string;
+  title: string;
+  imageUrl: string;
+}
+
+interface Album {
+  id: string;
+  title: string;
+  userId: string;
+  photos: Photo[];
+  username: string;
+}
 
 interface AlbumState {
-  albums: any[];
+  albums: Album[];
   loading: boolean;
   error: string | null;
 }
@@ -15,22 +31,55 @@ const initialState: AlbumState = {
 // Determine the base API URL based on the environment
 const baseUrl =
   process.env.NODE_ENV === "production"
-    ? "https://sil-backend-production.onrender.com/api/albums"
-    : "http://localhost:5000/api/albums";
+    ? "https://sil-backend-production.onrender.com/api"
+    : "http://localhost:5000/api";
 
 // Async thunk to fetch all albums
 export const fetchAlbums = createAsyncThunk(
   "albums/fetchAlbums",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(baseUrl, {
-        method: "GET",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch albums");
-      }
-      return await response.json();
+      const [albumResponse, userResponse] = await Promise.all([
+        axios.get(`${baseUrl}/albums`, { withCredentials: true }),
+        axios.get(`${baseUrl}/users`, { withCredentials: true }),
+      ]);
+
+      const albumData: Album[] = albumResponse.data;
+      const userData = userResponse.data;
+
+      // Create a mapping of userId to username
+      const userMap = userData.reduce(
+        (acc: Record<string, string>, user: { id: string; username: string }) => {
+          acc[user.id] = user.username;
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      // Fetch photos and add username to each album
+      const updatedAlbums = await Promise.all(
+        albumData.map(async (album) => {
+          const photosResponse = await axios.get(
+            `${baseUrl}/photos/albums/${album.id}`,
+            { withCredentials: true }
+          );
+          const photos: Photo[] = photosResponse.data.map(
+            (photo: { imageUrl: string; id: string; title: string }) => ({
+              imageUrl: photo.imageUrl,
+              id: photo.id,
+              title: photo.title,
+            })
+          );
+
+          return {
+            ...album,
+            photos,
+            username: userMap[album.userId] || "Unknown",
+          };
+        })
+      );
+
+      return updatedAlbums;
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -41,149 +90,90 @@ export const fetchAlbums = createAsyncThunk(
 export const createAlbum = createAsyncThunk(
   "albums/createAlbum",
   async (
-    albumData: { title: string; userId: string; files: File[] },
-    { rejectWithValue }
+    albumData: { title: string; files: File[] },
+    { rejectWithValue, getState }
   ) => {
+    // Retrieve the userId from the auth state
+    const state = getState() as RootState;  // Type your state accordingly
+    const userId = state.auth.id;
+
+    if (!userId) {
+      return rejectWithValue("User is not authenticated");
+    }
+
     const formData = new FormData();
     formData.append("title", albumData.title);
-    formData.append("userId", albumData.userId);
-    albumData.files.forEach((file, index) =>
-      formData.append("files", file, file.name)
+    formData.append("userId", userId);  // Pass the userId
+    albumData.files.forEach((file) =>
+      formData.append("photos", file, file.name)
     );
 
     try {
-      const response = await fetch(baseUrl, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
+      const response = await axios.post(`${baseUrl}/albums`, formData, {
+        withCredentials: true,
       });
+      const newAlbum = response.data;
 
-      if (!response.ok) {
-        throw new Error("Failed to create album");
-      }
-      // Assume the backend returns the created album, including photo URLs and user info
-      const albumWithUser = await response.json();
+      // Fetch the username using userId
+      const userResponse = await axios.get(`${baseUrl}/users/${newAlbum.userId}`, {
+        withCredentials: true,
+      });
+      const username = userResponse.data.username;
 
-      return albumWithUser;
-      return await response.json();
+      // Fetch the photos for the new album
+      const photosResponse = await axios.get(
+        `${baseUrl}/photos/albums/${newAlbum.id}`,
+        { withCredentials: true }
+      );
+      const photos = photosResponse.data.map((photo: Photo) => ({
+        imageUrl: photo.imageUrl,
+        id: photo.id,
+        title: photo.title,
+      }));
+
+      // Update the new album with photos and username
+      const updatedAlbum = {
+        ...newAlbum,
+        photos,
+        username,
+      };
+
+      return updatedAlbum;
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
   }
 );
 
-// Async thunk to update an album by ID
-export const updateAlbum = createAsyncThunk(
-  "albums/updateAlbum",
-  async (albumData: { id: string; title: string }, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${baseUrl}/${albumData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title: albumData.title }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update album");
-      }
-
-      return await response.json();
-    } catch (err: any) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
-
-// Async thunk to delete an album by ID
-export const deleteAlbum = createAsyncThunk(
-  "albums/deleteAlbum",
-  async (albumId: string, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${baseUrl}/${albumId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete album");
-      }
-
-      return albumId;
-    } catch (err: any) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
-
-const albumsSlice = createSlice({
+const albumSlice = createSlice({
   name: "albums",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch albums
       .addCase(fetchAlbums.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchAlbums.fulfilled, (state, action) => {
-        state.loading = false;
         state.albums = action.payload;
+        state.loading = false;
       })
       .addCase(fetchAlbums.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload as string;
+        state.loading = false;
       })
-      // Create album
       .addCase(createAlbum.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(createAlbum.fulfilled, (state, action) => {
-        state.loading = false;
         state.albums.push(action.payload);
+        state.loading = false;
       })
       .addCase(createAlbum.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload as string;
-      })
-      // Update album
-      .addCase(updateAlbum.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateAlbum.fulfilled, (state, action) => {
         state.loading = false;
-        const updatedAlbumIndex = state.albums.findIndex(
-          (album) => album.id === action.payload.id
-        );
-        if (updatedAlbumIndex !== -1) {
-          state.albums[updatedAlbumIndex] = action.payload;
-        }
-      })
-      .addCase(updateAlbum.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Delete album
-      .addCase(deleteAlbum.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteAlbum.fulfilled, (state, action) => {
-        state.loading = false;
-        state.albums = state.albums.filter(
-          (album) => album.id !== action.payload
-        );
-      })
-      .addCase(deleteAlbum.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
       });
   },
 });
 
-export default albumsSlice.reducer;
+export default albumSlice.reducer;

@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 interface AuthState {
+  [x: string]: any;
+  id: any;
   email: string | null;
   isAuthenticated: boolean;
   loading: boolean;
@@ -13,6 +15,7 @@ const initialState: AuthState = {
   isAuthenticated: false,
   loading: false,
   error: null,
+  id: undefined
 };
 
 // Async thunk for logging out
@@ -71,8 +74,9 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAuthUser.fulfilled, (state, action) => {
-        console.log("User details fetched successfully:", action.payload); // Log successful state update
+        console.log("User details fetched successfully:", action.payload);
         state.loading = false;
+        state.id = action.payload.id; // Set userId correctly
         state.email = action.payload.email;
         state.isAuthenticated = true;
       })

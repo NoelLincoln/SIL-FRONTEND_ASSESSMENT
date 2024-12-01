@@ -28,9 +28,6 @@ export const getAlbumById = async (id: string): Promise<Album | null> => {
 };
 
 /**
- * Create a new album
- */
-/**
  * Create a new album and fetch the associated user info (including username)
  */
 export const createAlbum = async (data: { title: string; userId: string }) => {
