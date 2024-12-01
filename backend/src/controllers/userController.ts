@@ -11,7 +11,6 @@ import {
 /**
  * Handle GitHub user creation if they don't exist in the database
  */
-// Handle GitHub user creation if they don't exist in the database
 export const handleGitHubUser = async (profile: any, res: Response) => {
   try {
     // Call the service function to handle the GitHub user
