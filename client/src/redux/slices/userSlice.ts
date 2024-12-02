@@ -13,13 +13,13 @@ interface Album {
 }
 
 export interface UserState {
-  users: User[];
-  userDetails: User | null;
-  userAlbums: Album[];
+  users: User[]; // Array of users
+  userDetails: User | null; // Single user details
+  userAlbums: Album[]; // Array of albums
   loading: boolean;
   error: string | null;
   imageLoading: boolean;
-  albumPhotos: Record<string, string>;
+  albumPhotos: Record<string, string>; // Photos related to albums
 }
 
 const initialState: UserState = {
@@ -35,9 +35,7 @@ const initialState: UserState = {
 // Dynamically set base URL based on environment
 const devUrl = import.meta.env.VITE_DEV_URL;
 const prodUrl = import.meta.env.VITE_PROD_URL;
-
-const baseUrl =
-  process.env.NODE_ENV === "production" ? prodUrl : devUrl;
+const baseUrl = process.env.NODE_ENV === "production" ? prodUrl : devUrl;
 
 // Async thunk to fetch users
 export const fetchUsers = createAsyncThunk<
@@ -111,42 +109,45 @@ export const fetchAlbumPhotos = createAsyncThunk<
       {
         method: "GET",
         credentials: "include",
-      }
+      },
     );
-
     if (!albumsResponse.ok) {
       throw new Error("Failed to fetch user albums");
     }
 
     const albums = await albumsResponse.json();
-
     const photoFetches = albums.map(async (album: Album) => {
       const photosResponse = await fetch(
         `${baseUrl}/photos/albums/${album.id}`,
-        { method: "GET", credentials: "include" }
+        {
+          method: "GET",
+          credentials: "include",
+        },
       );
-
       if (!photosResponse.ok) {
         throw new Error(`Failed to fetch photos for album ${album.id}`);
       }
 
       const photosData = await photosResponse.json();
-      const randomPhoto = photosData[Math.floor(Math.random() * photosData.length)];
-      return { albumId: album.id, imageUrl: randomPhoto ? randomPhoto.imageUrl : "" };
+      const randomPhoto =
+        photosData[Math.floor(Math.random() * photosData.length)];
+      return { albumId: album.id, imageUrl: randomPhoto?.imageUrl || "" };
     });
 
     const photosArray = await Promise.all(photoFetches);
-    const photos = photosArray.reduce((acc, { albumId, imageUrl }) => {
-      acc[albumId] = imageUrl;
-      return acc;
-    }, {} as Record<string, string>);
-
-    return photos;
+    return photosArray.reduce(
+      (acc, { albumId, imageUrl }) => {
+        acc[albumId] = imageUrl;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
   } catch (err: any) {
     return rejectWithValue(err.message || "An unknown error occurred.");
   }
 });
 
+// Slice with improved error handling
 const usersSlice = createSlice({
   name: "users",
   initialState,
@@ -159,7 +160,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload;
+        state.users = action.payload; // Payload is an array of users
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
@@ -172,7 +173,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUserDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.userDetails = action.payload;
+        state.userDetails = action.payload; // Payload is a single user
       })
       .addCase(fetchUserDetails.rejected, (state, action) => {
         state.loading = false;
@@ -186,7 +187,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUserAlbums.fulfilled, (state, action) => {
         state.loading = false;
-        state.userAlbums = action.payload;
+        state.userAlbums = action.payload; // Payload is an array of albums
       })
       .addCase(fetchUserAlbums.rejected, (state, action) => {
         state.loading = false;
@@ -199,7 +200,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchAlbumPhotos.fulfilled, (state, action) => {
         state.imageLoading = false;
-        state.albumPhotos = action.payload;
+        state.albumPhotos = action.payload; // Payload is a record of album photos
       })
       .addCase(fetchAlbumPhotos.rejected, (state, action) => {
         state.imageLoading = false;
