@@ -8,7 +8,7 @@ describe("User Routes", () => {
 
   // Increase the timeout for beforeAll hook
   beforeAll(async () => {
-    // Automatically create a test user before all tests
+    // Create a test user with a static ID for testing
     const user = await prisma.user.create({
       data: {
         githubId: "271222547",
@@ -18,7 +18,9 @@ describe("User Routes", () => {
       },
     });
 
+    // Store the dynamically generated userId
     userId = user.id;
+    console.log("Created user with ID:", userId); // Log userId for debugging
   }, 10000); // Set the timeout to 10 seconds for the beforeAll hook
 
   // Close the server and clean up the test data after all tests
@@ -57,9 +59,12 @@ describe("User Routes", () => {
 
   // Test GET /api/users/:id
   it("should fetch a user by ID", async () => {
+    // Ensure the correct userId is being used here
+    console.log("Test userId:", userId); // Log the userId used for fetching
+
     const response = await request(server).get(`/api/users/${userId}`);
     expect(response.status).toBe(200);
-    expect(response.body.id).toBe(userId);
+    expect(response.body.id).toBe(userId); // Ensure the ID matches the one created in beforeAll
   });
 
   // Test PUT /api/users/:id

@@ -1,24 +1,26 @@
 {
-    "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
-      "strict": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "outDir": "./dist",
-      "composite": true, 
-      "declaration": true,
-      "esModuleInterop": true,
-      "types": ["jest"]
-    },
-    "include": [
-      "src/**/*", "tests/__mocks__","tests/**/*.d.ts"
-    ],
-    "exclude": [
-      "node_modules",
-      "dist",
-      "tests/**/*",
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "composite": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": ["jest", "express-session"] 
+  },
+  "include": [
+    "src/**/*",
+    "tests/__mocks__",
+    "tests/**/*.d.ts",
+    "types"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests/**/*",
     "**/*.test.ts"
-    ]
-  }
-  
+  ]
+}

@@ -11,7 +11,7 @@
     "dev": "concurrently \"yarn --cwd backend dev\" \"yarn --cwd client dev\"",
     "build": "yarn --cwd backend build && yarn --cwd client build",
     "start": "concurrently \"yarn --cwd backend start\" \"yarn --cwd client preview\"",
-    "test": "concurrently \"yarn --cwd backend test\"",
+    "test": "yarn --cwd client test",
     "lint:fix": "yarn --cwd backend lint:fix && yarn --cwd client lint:fix",
     "prepare": "husky install"
   },

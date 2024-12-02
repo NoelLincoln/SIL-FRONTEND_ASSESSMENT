@@ -40,18 +40,23 @@ export const getAlbumById = async (
 /**
  * Create a new album
  */
-export const createAlbum = async (req: Request, res: Response): Promise<void> => {
+export const createAlbum = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { title, userId } = req.body;
   const files = req.files as Express.Multer.File[];
 
-  console.log("Creating album with title:", title);
-  console.log("User ID:", userId);
-  console.log("Files received:", files);
-
   try {
-    // Create the album and get the album data along with the username
+    // Create the album
     const newAlbum = await albumService.createAlbum({ title, userId });
-    console.log("New album created:", newAlbum);
+
+    // Fetch the user's username
+    const user = await userService.getUserById(userId);
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
 
     // Upload photos to Cloudinary
     const photoUrls = await Promise.all(
@@ -59,17 +64,20 @@ export const createAlbum = async (req: Request, res: Response): Promise<void> =>
         const result = await cloudinary.uploader.upload(file.path, {
           folder: "albums",
         });
-        console.log("Uploaded photo URL:", result.secure_url);
         return result.secure_url;
-      })
+      }),
     );
 
     // Associate photos with the album
     await albumService.addPhotosToAlbum(newAlbum.id, photoUrls);
-    console.log("Photos added to album:", newAlbum.id);
 
-    // Send the response with the album and username
-    res.status(201).json(newAlbum);
+    // Include username in the response
+    const albumWithUser = {
+      ...newAlbum,
+      username: user.username,
+    };
+
+    res.status(201).json(albumWithUser);
   } catch (error) {
     console.error("Error creating album:", error);
     res.status(500).json({ error: "Failed to create album" });

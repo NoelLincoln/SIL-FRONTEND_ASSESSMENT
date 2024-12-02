@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import Header from "./Header";
+import { createAlbum } from "../redux/slices/albumSlice";
+import { AppDispatch } from "../redux/store";
+import { useDispatch } from "react-redux";
 
 interface Photo {
   id: string;
@@ -14,88 +15,24 @@ interface Album {
   title: string;
   userId: string;
   photos: Photo[];
-  username: string; // Add username here
+  username: string;
 }
 
-const Albums: React.FC = () => {
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [albumTitle, setAlbumTitle] = useState<string>("");
+interface AlbumsProps {
+  albums: Album[];
+  loading: boolean;
+  error: string | null;
+}
+
+const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [albumTitle, setAlbumTitle] = useState("");
   const [albumPhotos, setAlbumPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
-  const [userId, setUserId] = useState<string>("");
-  const [username, setUsername] = useState<string>(""); // Store username here
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchAlbumsAndUsers = async () => {
-      try {
-        const [albumResponse, userResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/albums"),
-          axios.get("http://localhost:5000/api/users"),
-        ]);
-
-        const albumData: Album[] = albumResponse.data;
-        const userData = userResponse.data;
-
-        // Create a mapping of userId to username
-        const userMap = userData.reduce(
-          (
-            acc: Record<string, string>,
-            user: { id: string; username: string },
-          ) => {
-            acc[user.id] = user.username;
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-        // Fetch photos and add username to each album
-        const updatedAlbums = await Promise.all(
-          albumData.map(async (album) => {
-            const photosResponse = await axios.get(
-              `http://localhost:5000/api/photos/albums/${album.id}`,
-            );
-            console.log("Photos Response:", photosResponse.data);
-            const photos: Photo[] = photosResponse.data.map(
-              (photo: { imageUrl: string; id: string; title: string }) => ({
-                imageUrl: photo.imageUrl,
-                id: photo.id,
-                title: photo.title,
-              }),
-            );
-
-            return {
-              ...album,
-              photos,
-              username: userMap[album.userId] || "Unknown",
-            };
-          }),
-        );
-
-        setAlbums(updatedAlbums);
-      } catch (error) {
-        console.error("Error fetching albums or users:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAlbumsAndUsers();
-
-    // Fetch current user details
-    axios
-      .get("http://localhost:5000/api/auth/me", { withCredentials: true })
-      .then((response) => {
-        setUserId(response.data.id);
-        setUsername(response.data.username); // Set username on login
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
-  }, []);
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -112,133 +49,114 @@ const Albums: React.FC = () => {
     setPhotoPreviews((prevPreviews) => [...prevPreviews, ...previews]);
   };
 
-  const handleAddAlbum = () => {
+  const handleAddAlbum = async () => {
+    if (!albumTitle) {
+      alert("Please provide an album title.");
+      return;
+    }
+
     setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append("title", albumTitle);
-    formData.append("userId", userId);
-    albumPhotos.forEach((photo) => {
-      formData.append("photos", photo);
-    });
 
-    axios
-      .post("http://localhost:5000/api/albums", formData, {
-        withCredentials: true,
-      })
-      .then((response) => {
-        const newAlbum = response.data;
+    const albumData = { title: albumTitle, userId: "user-id-placeholder", files: albumPhotos };
 
-        // Immediately fetch the photos for the new album
-        axios
-          .get(`http://localhost:5000/api/photos/albums/${newAlbum.id}`)
-          .then((photosResponse) => {
-            const photos: Photo[] = photosResponse.data.map(
-              (photo: { imageUrl: string; id: string; title: string }) => ({
-                imageUrl: photo.imageUrl,
-                id: photo.id,
-                title: photo.title,
-              }),
-            );
+    try {
+      await dispatch(createAlbum(albumData)).unwrap();
+      setToastMessage("Album has been successfully added!");
+      setTimeout(() => setToastMessage(null), 3000);
 
-            // Update the new album with the fetched photos and username
-            const updatedAlbum = {
-              ...newAlbum,
-              photos,
-              username: username, // Use the dynamically fetched username
-            };
-
-            setAlbums((prevAlbums) => [updatedAlbum, ...prevAlbums]);
-
-            // Show success toast
-            setToastMessage("Album has been successfully added!");
-            setTimeout(() => setToastMessage(null), 3000); // Clear toast after 3 seconds
-
-            // Close the modal
-            toggleModal();
-            setAlbumTitle("");
-            setAlbumPhotos([]);
-            setPhotoPreviews([]);
-          })
-          .catch((error) => {
-            console.error("Error fetching album photos:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error creating album:", error);
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      // Close the modal and reset fields after successful album creation
+      toggleModal();
+      setAlbumTitle("");
+      setAlbumPhotos([]);
+      setPhotoPreviews([]);
+    } catch (error: any) {
+      console.error("Error creating album:", error);
+      alert("Failed to create album. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (isLoading) {
-    return <div>Loading albums...</div>;
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-sm">
+          <img
+            src="/images/server-error-image.png"
+            alt="Error"
+            className="mx-auto mb-4 w-24"
+          />
+          <h2 className="text-2xl font-semibold text-red-500">Oops!</h2>
+          <p className="text-gray-700 mt-2">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <>
-      <Header />
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">
-            {albums.length === 0 ? "No Albums yet 😞" : "All Albums"}
-          </h1>
           <button
             onClick={toggleModal}
-            className="px-6 py-2 bg-blue-600 text-white rounded-full"
+            className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
           >
             Add Album
           </button>
         </div>
 
-        {albums.length === 0 ? (
-          <div className="text-center">
+        {loading ? (
+          <div className="flex justify-center items-center mt-6">
+            <div className="w-8 h-8 border-4 border-t-4 border-blue-600 border-solid rounded-full animate-spin"></div>
+          </div>
+        ) : albums.length === 0 ? (
+          <div className="text-center mt-6">
             <p className="mt-2">Be the first one to add one!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {albums.map((album) => (
-              <div
-                key={album.id}
-                className="p-4 border border-gray-300 rounded-lg shadow-sm"
-              >
-                <h2 className="font-bold text-lg mb-2">{album.title}</h2>
-                <p className="mb-2 text-sm">
-                  Created by: {album.username}
-                  <a
-                    href={`/users/${album.userId}`}
-                    className="text-blue-500 hover:underline"
-                  >
-                     {/* Correctly showing username */}
-                  </a>
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  {album.photos && album.photos.length > 0 ? (
-                    album.photos.map((photo) => (
-                      <img
-                        key={photo.id}
-                        src={photo.imageUrl}
-                        alt={`Album ${album.title} - ${photo.title}`}
-                        className="w-32 h-32 object-cover rounded"
-                      />
-                    ))
-                  ) : (
-                    <p className="text-gray-500 italic">No photos available</p>
-                  )}
-                </div>
-                <a
-                  href={`/albums/${album.id}`}
-                  className="text-blue-500 hover:underline mt-4 block"
-                >
-                  View Album
-                </a>
-              </div>
-            ))}
+           {albums.slice().reverse().map((album: Album) => (
+  <div
+    key={album.id}
+    className="p-4 border border-gray-300 rounded-lg shadow-sm transition hover:shadow-lg"
+  >
+    <h2 className="font-bold text-lg mb-2">{album.title}</h2>
+    <p className="mb-2 text-sm">
+      Created by:{" "}
+      <a
+        href={`/users/${album.userId}`}
+        className="text-blue-500 hover:underline"
+      >
+        {album.username}
+      </a>
+    </p>
+    <div className="flex flex-wrap gap-4">
+      {album.photos.length > 0 ? (
+        album.photos.map((photo) => (
+          <img
+            key={photo.id}
+            src={photo.imageUrl}
+            alt={`Album ${album.title} - ${photo.title}`}
+            className="w-32 h-32 object-cover rounded"
+          />
+        ))
+      ) : (
+        <p className="text-gray-500 italic">No photos available</p>
+      )}
+    </div>
+    <a
+      href={`/albums/${album.id}`}
+      className="text-blue-500 hover:underline mt-4 block"
+    >
+      View Album
+    </a>
+  </div>
+))}
+
           </div>
         )}
       </div>
 
-      {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg">
           {toastMessage}
@@ -262,33 +180,32 @@ const Albums: React.FC = () => {
               placeholder="Album Title"
               value={albumTitle}
               onChange={(e) => setAlbumTitle(e.target.value)}
-              className="w-full px-4 py-2 border rounded mb-4"
+              className="w-full px-4 py-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
             <input
               type="file"
               multiple
-              accept="image/*"
               onChange={handlePhotoChange}
               className="w-full mb-4"
             />
-            <div className="mb-4 flex gap-4">
-              {photoPreviews.map((preview, index) => (
-                <img
-                  key={index}
-                  src={preview}
-                  alt="Preview"
-                  className="w-24 h-24 object-cover rounded"
-                />
-              ))}
-            </div>
+            {photoPreviews.length > 0 && (
+              <div className="flex gap-4 mb-4">
+                {photoPreviews.map((preview, index) => (
+                  <img
+                    key={index}
+                    src={preview}
+                    alt={`Preview ${index}`}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                ))}
+              </div>
+            )}
             <button
               onClick={handleAddAlbum}
-              className={`w-full py-2 bg-blue-600 text-white rounded-full ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-              }`}
               disabled={isSubmitting}
+              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
             >
-              {isSubmitting ? "Adding..." : "Add Album"}
+              {isSubmitting ? "Submitting..." : "Create Album"}
             </button>
           </div>
         </div>

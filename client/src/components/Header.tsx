@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store"; 
-import { logoutUser, fetchAuthUser } from "../redux/reducers/authSlice";
-import { AppDispatch } from "../redux/store"; // Import AppDispatch type
+import { RootState } from "../redux/store";
+import { Link } from "react-router-dom";
+import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
+import { AppDispatch } from "../redux/store";
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -11,7 +12,7 @@ const Header: React.FC = () => {
 
   // Access the user email, authentication state, and loading/error from Redux
   const { email, isAuthenticated, loading, error } = useSelector(
-    (state: RootState) => state.auth,
+    (state: RootState) => state.auth
   );
 
   const dispatch = useDispatch<AppDispatch>();
@@ -28,12 +29,17 @@ const Header: React.FC = () => {
 
   // Close nav menu when clicking outside
   const closeNav = () => {
-    if (isNavOpen) setIsNavOpen(false);
+    setIsNavOpen(false);
   };
 
   // Close profile dropdown when clicking outside
   const closeProfile = () => {
-    if (isProfileOpen) setIsProfileOpen(false);
+    setIsProfileOpen(false);
+  };
+
+  // Go back to the previous page
+  const goBack = () => {
+    window.history.back();
   };
 
   // Logout user by dispatching the async logoutUser action
@@ -41,24 +47,60 @@ const Header: React.FC = () => {
     try {
       // Dispatch the logoutUser action to perform logout API call
       await dispatch(logoutUser());
-      // Optionally, redirect to the login page or home page after logout
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
   useEffect(() => {
-    if (!isAuthenticated && !loading) {
+    if (!isAuthenticated && !loading && !email) {
       // If the user is not authenticated and there's no loading, perform the API call to fetch user data
       dispatch(fetchAuthUser());
     }
-  }, [dispatch, isAuthenticated, loading]);
+  }, [dispatch, isAuthenticated, loading, email]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Type assertion: tell TypeScript that event.target is an HTMLElement
+      const target = event.target as HTMLElement;
+
+      if (target && !target.closest(".profile-dropdown") && isProfileOpen) {
+        closeProfile();
+      }
+      if (target && !target.closest(".nav-menu") && isNavOpen) {
+        closeNav();
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [isNavOpen, isProfileOpen]);
+
 
   return (
-    <header className="bg-gray-800 text-white py-4">
+    <header className="bg-gray-800 text-white">
       <div className="container mx-auto flex items-center justify-between px-6">
-        {/* Logo/Brand */}
-        <div className="text-2xl font-semibold">ALBUM GENIE</div>
+        {/* Logo */}
+        <div className="flex items-center text-2xl font-semibold space-x-2">
+          {/* Angle Left Icon - Visible Only on Small Devices */}
+          <FaAngleLeft
+            size={30}
+            className="lg:hidden block cursor-pointer"
+            onClick={goBack}
+            data-testid="back-button"
+          />
+          <div>
+            <Link to="/home">
+              <img
+                src="/images/logo.png"
+                alt="Album Genie Logo"
+                width={150}
+                height={150}
+                className="transition-transform duration-200 hover:scale-105 cursor-pointer"
+              />
+            </Link>
+          </div>
+        </div>
 
         {/* Nav for Large Screens */}
         <nav className="hidden lg:flex space-x-6">
@@ -68,28 +110,28 @@ const Header: React.FC = () => {
           <a href="/albums" className="hover:text-gray-400">
             Albums
           </a>
-          <a href="/add-album" className="hover:text-gray-400">
-            Add Album
-          </a>
+
           {isAuthenticated && (
-            <div className="relative">
+            <div className="relative profile-dropdown">
               <button
                 onClick={toggleProfile}
                 className="flex items-center space-x-2 hover:text-gray-400"
+                aria-expanded={isProfileOpen ? "true" : "false"}
+                aria-controls="profile-dropdown-menu"
               >
                 <FaUserCircle size={24} />
                 <span>Profile</span>
               </button>
               {isProfileOpen && (
                 <div
+                  id="profile-dropdown-menu"
                   className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <p>{email || "Loading..."}</p>
                   <button
                     className="text-red-500 mt-2"
                     onClick={handleLogout}
-                    disabled={loading} // Disable the logout button if loading
+                    disabled={loading}
                   >
                     {loading ? "Logging out..." : "Logout"}
                   </button>
@@ -108,17 +150,14 @@ const Header: React.FC = () => {
 
       {/* Mobile Navigation Menu */}
       {isNavOpen && (
-        <div className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2">
+        <div className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2 nav-menu">
           <div className="flex flex-col items-center space-y-6">
-            {/* Close Icon */}
             <button
               className="absolute top-6 right-6 text-white"
               onClick={closeNav}
             >
               <FaTimes size={30} />
             </button>
-
-            {/* Menu Items */}
             <a
               href="/home"
               className="block text-lg font-medium hover:text-gray-400"
@@ -132,13 +171,6 @@ const Header: React.FC = () => {
               onClick={closeNav}
             >
               Albums
-            </a>
-            <a
-              href="/add-album"
-              className="block text-lg font-medium hover:text-gray-400"
-              onClick={closeNav}
-            >
-              Add Album
             </a>
             {isAuthenticated && (
               <div className="relative">
@@ -158,7 +190,7 @@ const Header: React.FC = () => {
                     <button
                       className="text-red-500 mt-2"
                       onClick={handleLogout}
-                      disabled={loading} // Disable the logout button if loading
+                      disabled={loading}
                     >
                       {loading ? "Logging out..." : "Logout"}
                     </button>

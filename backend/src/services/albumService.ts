@@ -4,10 +4,13 @@ import cloudinary from "../config/cloudinaryConfig";
 const prisma = new PrismaClient();
 
 /**
- * Get all albums with username
+ * Get all albums with username, sorted by createdAt (latest first)
  */
 export const getAlbums = async (): Promise<Album[]> => {
   return prisma.album.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
     include: {
       user: {
         select: {
@@ -27,9 +30,6 @@ export const getAlbumById = async (id: string): Promise<Album | null> => {
   });
 };
 
-/**
- * Create a new album
- */
 /**
  * Create a new album and fetch the associated user info (including username)
  */

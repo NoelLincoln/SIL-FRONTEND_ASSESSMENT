@@ -1,14 +1,11 @@
-import React, { useEffect, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchUsers } from "../redux/reducers/userSlice";
-import { fetchAlbums } from "../redux/reducers/albumSlice";
-import { RootState, AppDispatch } from "../redux/store";
-import Header from "./Header";
+import React, { useCallback } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 import UserCard from "./UserCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Home: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-
+  // Fetch users and albums from the Redux state
   const {
     users,
     loading: usersLoading,
@@ -20,19 +17,16 @@ const Home: React.FC = () => {
     error: albumsError,
   } = useSelector((state: RootState) => state.albums);
 
-  useEffect(() => {
-    dispatch(fetchUsers());
-    dispatch(fetchAlbums());
-  }, [dispatch]);
-
+  // Calculate the number of albums for each user
   const getUserAlbumCount = useCallback(
     (userId: string) =>
       albums.filter((album) => album.userId === userId).length,
     [albums],
   );
 
+  // Show a single spinner while data or authentication state is loading
   if (usersLoading || albumsLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (usersError || albumsError) {
@@ -41,7 +35,6 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <Header />
       <div className="bg-gray-100 min-h-screen p-6">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold text-center mb-8">Users List</h1>
