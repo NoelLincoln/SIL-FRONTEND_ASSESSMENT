@@ -2,7 +2,7 @@
 <a name="readme-top"></a>
 
 <div align="center">
-  <img src="murple_logo.png" alt="logo" width="140" height="auto" />
+  <img src="logo.png" alt="logo" width="140" height="auto" />
   <br/>
   <h3><b>SIL FRONTEND ENGINEER ASSESSMENT</b></h3>
 </div>
@@ -74,7 +74,7 @@ This project is part of the SIL Frontend Engineer Assessment. It aims to showcas
 
 ## 🚀 Live Demo <a name="live-demo"></a>
 
-- [Live Demo Link](https://example.com)
+- [Live Demo Link](https://sil-frontend.vercel.app)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

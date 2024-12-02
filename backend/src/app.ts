@@ -15,7 +15,7 @@ const prisma = new PrismaClient();
 // Enable CORS for the frontend
 app.use(
   cors({
-    origin: "http://localhost:5173", // Adjust to your frontend URL in production
+    origin: "sil-frontend.vercel.app",
     credentials: true, // Allow cookies to be sent with requests
   }),
 );
