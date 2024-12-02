@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice
+import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store";
 
 const Header: React.FC = () => {

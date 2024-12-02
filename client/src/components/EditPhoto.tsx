@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPhotoById, updatePhotoTitle } from "../redux/slices/photoSlice
+import { fetchPhotoById, updatePhotoTitle } from "../redux/slices/photoSlice";
 import { toast } from "react-toastify";
 import { AppDispatch } from "../redux/store";
 import LoadingSpinner from "./LoadingSpinner"

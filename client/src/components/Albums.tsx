@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { createAlbum } from "../redux/slices/albumSlice";
-import { AppDispatch } from "../redux/store
+import { AppDispatch } from "../redux/store";
 import { useDispatch } from "react-redux";
 
 interface Photo {
