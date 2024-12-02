@@ -12,7 +12,7 @@ const Header: React.FC = () => {
 
   // Access the user email, authentication state, and loading/error from Redux
   const { email, isAuthenticated, loading, error } = useSelector(
-    (state: RootState) => state.auth,
+    (state: RootState) => state.auth
   );
 
   const dispatch = useDispatch<AppDispatch>();
@@ -29,12 +29,12 @@ const Header: React.FC = () => {
 
   // Close nav menu when clicking outside
   const closeNav = () => {
-    if (isNavOpen) setIsNavOpen(false);
+    setIsNavOpen(false);
   };
 
   // Close profile dropdown when clicking outside
   const closeProfile = () => {
-    if (isProfileOpen) setIsProfileOpen(false);
+    setIsProfileOpen(false);
   };
 
   // Go back to the previous page
@@ -53,11 +53,29 @@ const Header: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!isAuthenticated && !loading) {
+    if (!isAuthenticated && !loading && !email) {
       // If the user is not authenticated and there's no loading, perform the API call to fetch user data
       dispatch(fetchAuthUser());
     }
-  }, [dispatch, isAuthenticated, loading]);
+  }, [dispatch, isAuthenticated, loading, email]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Type assertion: tell TypeScript that event.target is an HTMLElement
+      const target = event.target as HTMLElement;
+
+      if (target && !target.closest(".profile-dropdown") && isProfileOpen) {
+        closeProfile();
+      }
+      if (target && !target.closest(".nav-menu") && isNavOpen) {
+        closeNav();
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [isNavOpen, isProfileOpen]);
+
 
   return (
     <header className="bg-gray-800 text-white">
@@ -65,16 +83,12 @@ const Header: React.FC = () => {
         {/* Logo */}
         <div className="flex items-center text-2xl font-semibold space-x-2">
           {/* Angle Left Icon - Visible Only on Small Devices */}
-          <div className="flex items-center text-2xl font-semibold space-x-2">
-            {/* Angle Left Icon - Visible Only on Small Devices and Clickable to Go Back */}
-            <FaAngleLeft
-              size={30}
-              className="lg:hidden block cursor-pointer"
-              onClick={goBack}
-            />
-          </div>
-          {/* Logo/Brand */}
-          {/* Logo/Brand */}
+          <FaAngleLeft
+            size={30}
+            className="lg:hidden block cursor-pointer"
+            onClick={goBack}
+            data-testid="back-button"
+          />
           <div>
             <Link to="/home">
               <img
@@ -98,24 +112,26 @@ const Header: React.FC = () => {
           </a>
 
           {isAuthenticated && (
-            <div className="relative">
+            <div className="relative profile-dropdown">
               <button
                 onClick={toggleProfile}
                 className="flex items-center space-x-2 hover:text-gray-400"
+                aria-expanded={isProfileOpen ? "true" : "false"}
+                aria-controls="profile-dropdown-menu"
               >
                 <FaUserCircle size={24} />
                 <span>Profile</span>
               </button>
               {isProfileOpen && (
                 <div
+                  id="profile-dropdown-menu"
                   className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <p>{email || "Loading..."}</p>
                   <button
                     className="text-red-500 mt-2"
                     onClick={handleLogout}
-                    disabled={loading} // Disable the logout button if loading
+                    disabled={loading}
                   >
                     {loading ? "Logging out..." : "Logout"}
                   </button>
@@ -134,17 +150,14 @@ const Header: React.FC = () => {
 
       {/* Mobile Navigation Menu */}
       {isNavOpen && (
-        <div className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2">
+        <div className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-1/2 nav-menu">
           <div className="flex flex-col items-center space-y-6">
-            {/* Close Icon */}
             <button
               className="absolute top-6 right-6 text-white"
               onClick={closeNav}
             >
               <FaTimes size={30} />
             </button>
-
-            {/* Menu Items */}
             <a
               href="/home"
               className="block text-lg font-medium hover:text-gray-400"
@@ -159,7 +172,6 @@ const Header: React.FC = () => {
             >
               Albums
             </a>
-
             {isAuthenticated && (
               <div className="relative">
                 <button
@@ -178,7 +190,7 @@ const Header: React.FC = () => {
                     <button
                       className="text-red-500 mt-2"
                       onClick={handleLogout}
-                      disabled={loading} // Disable the logout button if loading
+                      disabled={loading}
                     >
                       {loading ? "Logging out..." : "Logout"}
                     </button>
