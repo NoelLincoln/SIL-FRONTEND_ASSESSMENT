@@ -48,7 +48,7 @@ export const updatePhotoTitle = createAsyncThunk(
 );
 
 // Initial state for the slice
-interface PhotoState {
+export interface PhotoState {
   photos: Photo[];
   selectedPhoto: Photo | null;
   loading: boolean;
