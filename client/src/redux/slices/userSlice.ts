@@ -12,7 +12,7 @@ interface Album {
   title: string;
 }
 
-interface UserState {
+export interface UserState {
   users: User[];
   userDetails: User | null;
   userAlbums: Album[];

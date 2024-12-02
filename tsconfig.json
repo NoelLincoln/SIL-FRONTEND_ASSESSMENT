@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "outDir": "./dist", // Set the output directory for transpiled JS files
     "baseUrl": ".", // Make sure the base URL is set to the root
     "strict": true,

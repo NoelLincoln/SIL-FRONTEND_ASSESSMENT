@@ -1,9 +1,12 @@
+import '@testing-library/jest-dom';
 import { render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
-import { RootState } from "../../redux/store"; // Correct path for RootState
-import Home from "../../components/Home"; // Correct path for Home component
-import  UserState  from "../../redux/slices/userSlice"; // Ensure you import the correct type for UserState
+import { RootState } from "../../redux/store";
+import Home from "../../components/Home";
+import { MemoryRouter } from "react-router-dom";  // Import MemoryRouter for wrapping components
+import type { UserState } from "../../redux/slices/userSlice"; // Import UserState as a type
+import React from "react";
 
 // Mock store for testing
 const mockStore = (state: Partial<RootState>) => {
@@ -36,12 +39,14 @@ describe("Home Component", () => {
 
     render(
       <Provider store={store}>
-        <Home />
+        <MemoryRouter> 
+          <Home />
+        </MemoryRouter>
       </Provider>
     );
 
-    // Check that the loading spinner is rendered
-    expect(screen.getByRole("spinner")).toBeInTheDocument(); // Ensure your LoadingSpinner has a role="spinner"
+    // Ensure the loading spinner is rendered using data-testid
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
   });
 
   it("displays user list when data is loaded", () => {
@@ -60,8 +65,14 @@ describe("Home Component", () => {
       } as UserState,
       albums: {
         albums: [
-          { id: "1", title: "Album 1", userId: "1" },
-          { id: "2", title: "Album 2", userId: "2" },
+          {
+            id: "1", title: "Album 1", userId: "1",
+            photos: [], username: ""
+          },
+          {
+            id: "2", title: "Album 2", userId: "2",
+            photos: [], username: ""
+          },
         ],
         loading: false,
         error: null,
@@ -72,7 +83,9 @@ describe("Home Component", () => {
 
     render(
       <Provider store={store}>
-        <Home />
+        <MemoryRouter>  {/* Wrap in MemoryRouter */}
+          <Home />
+        </MemoryRouter>
       </Provider>
     );
 
@@ -103,7 +116,9 @@ describe("Home Component", () => {
 
     render(
       <Provider store={store}>
-        <Home />
+        <MemoryRouter>  {/* Wrap in MemoryRouter */}
+          <Home />
+        </MemoryRouter>
       </Provider>
     );
 
