@@ -33,8 +33,8 @@ const initialState: UserState = {
 };
 
 // Dynamically set base URL based on environment
-const devUrl = process.env.DEV_URL;
-const prodUrl = process.env.PROD_URL;
+const devUrl = import.meta.env.VITE_DEV_URL;
+const prodUrl = import.meta.env.VITE_PROD_URL;
 
 const baseUrl =
   process.env.NODE_ENV === "production" ? prodUrl : devUrl;
@@ -46,7 +46,7 @@ export const fetchUsers = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUsers", async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${baseUrl}/api/users`, {
+    const response = await fetch(`${baseUrl}/users`, {
       method: "GET",
       credentials: "include",
     });
@@ -66,7 +66,7 @@ export const fetchUserDetails = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUserDetails", async (userId, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${baseUrl}/api/users/${userId}`, {
+    const response = await fetch(`${baseUrl}/users/${userId}`, {
       method: "GET",
       credentials: "include",
     });
@@ -86,7 +86,7 @@ export const fetchUserAlbums = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUserAlbums", async (userId, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${baseUrl}/api/albums?userId=${userId}`, {
+    const response = await fetch(`${baseUrl}/albums?userId=${userId}`, {
       method: "GET",
       credentials: "include",
     });
@@ -122,7 +122,7 @@ export const fetchAlbumPhotos = createAsyncThunk<
 
     const photoFetches = albums.map(async (album: Album) => {
       const photosResponse = await fetch(
-        `${baseUrl}/api/photos/albums/${album.id}`,
+        `${baseUrl}/photos/albums/${album.id}`,
         { method: "GET", credentials: "include" }
       );
 

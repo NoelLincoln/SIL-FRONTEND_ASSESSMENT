@@ -3,8 +3,10 @@ import axios from "axios";
 import { RootState } from "../store"; // Assuming you have a RootState defined for your store
 
 
-const devUrl = process.env.DEV_URL;
-const prodUrl = process.env.PROD_URL;
+const devUrl = import.meta.env.VITE_DEV_URL;
+const prodUrl = import.meta.env.VITE_PROD_URL;
+
+console.log("Dev url",devUrl)
 
 interface Photo {
   id: string;

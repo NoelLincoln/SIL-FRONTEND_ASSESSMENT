@@ -18,8 +18,8 @@ const initialState: AuthState = {
   id: undefined
 };
 
-const devUrl = process.env.DEV_URL;
-const prodUrl = process.env.PROD_URL;
+const devUrl = import.meta.env.VITE_DEV_URL;
+const prodUrl = import.meta.env.VITE_PROD_URL;
 
 const baseUrl =
   process.env.NODE_ENV === "production"
@@ -31,7 +31,7 @@ export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
-      await axios.get(`${baseUrl}/api/auth/logout`, {
+      await axios.get(`${baseUrl}/auth/logout`, {
         withCredentials: true,
       });
     } catch (error: any) {
@@ -45,7 +45,7 @@ export const fetchAuthUser = createAsyncThunk(
   "auth/fetchAuthUser",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${baseUrl}/api/auth/me`, {
+      const response = await axios.get(`${baseUrl}/auth/me`, {
         withCredentials: true,
       });
       return response.data;

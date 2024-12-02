@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
+import { Link } from "react-router-dom";
 import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store";
 
@@ -36,10 +37,10 @@ const Header: React.FC = () => {
     if (isProfileOpen) setIsProfileOpen(false);
   };
 
-    // Go back to the previous page
-    const goBack = () => {
-      window.history.back();
-    };
+  // Go back to the previous page
+  const goBack = () => {
+    window.history.back();
+  };
 
   // Logout user by dispatching the async logoutUser action
   const handleLogout = async () => {
@@ -59,20 +60,32 @@ const Header: React.FC = () => {
   }, [dispatch, isAuthenticated, loading]);
 
   return (
-    <header className="bg-gray-800 text-white py-4">
+    <header className="bg-gray-800 text-white">
       <div className="container mx-auto flex items-center justify-between px-6">
         {/* Logo */}
         <div className="flex items-center text-2xl font-semibold space-x-2">
           {/* Angle Left Icon - Visible Only on Small Devices */}
           <div className="flex items-center text-2xl font-semibold space-x-2">
-          {/* Angle Left Icon - Visible Only on Small Devices and Clickable to Go Back */}
-          <FaAngleLeft
-            size={30}
-            className="lg:hidden block cursor-pointer"
-            onClick={goBack}
-          />
+            {/* Angle Left Icon - Visible Only on Small Devices and Clickable to Go Back */}
+            <FaAngleLeft
+              size={30}
+              className="lg:hidden block cursor-pointer"
+              onClick={goBack}
+            />
           </div>
-           <span>ALBUM GENIE</span>
+          {/* Logo/Brand */}
+          {/* Logo/Brand */}
+          <div>
+            <Link to="/home">
+              <img
+                src="/images/logo.png"
+                alt="Album Genie Logo"
+                width={150}
+                height={150}
+                className="transition-transform duration-200 hover:scale-105 cursor-pointer"
+              />
+            </Link>
+          </div>
         </div>
 
         {/* Nav for Large Screens */}
@@ -83,7 +96,7 @@ const Header: React.FC = () => {
           <a href="/albums" className="hover:text-gray-400">
             Albums
           </a>
-         
+
           {isAuthenticated && (
             <div className="relative">
               <button
@@ -146,7 +159,7 @@ const Header: React.FC = () => {
             >
               Albums
             </a>
-           
+
             {isAuthenticated && (
               <div className="relative">
                 <button
