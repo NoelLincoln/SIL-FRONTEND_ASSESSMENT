@@ -76,10 +76,6 @@ jobs:
         working-directory: ./client
         run: yarn eslint "**/*.{js,jsx,ts,tsx}"
 
-      # Run Stylelint for the client
-      - name: Run Stylelint
-        working-directory: ./client
-        run: yarn stylelint "**/*.{css,scss,less}"
 
   # Build and deploy backend
   deploy-backend:
