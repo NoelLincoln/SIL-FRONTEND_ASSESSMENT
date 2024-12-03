@@ -9,6 +9,7 @@
     "composite": true,
     "declaration": true,
     "esModuleInterop": true,
+    "types": ["jest", "express-session"] 
   },
   "include": [
     "src/**/*",
