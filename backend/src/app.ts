@@ -12,12 +12,16 @@ import { checkSession } from "../src/utils/sessionUtils"; // Import session util
 const app = express();
 const prisma = new PrismaClient();
 
+// Log the NODE_ENV to verify it's set correctly
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
 // Allowed origins for CORS
 const allowedOrigins = [
   "https://sil-frontend.vercel.app", // Production URL
   "http://localhost:5173",          // Development URL
   "https://vercel.live",
   "https://sil-frontend-assessment.onrender.com",
+  "http://localhost:4173"
 ];
 
 // Enable CORS dynamically based on the origin
@@ -48,8 +52,9 @@ app.use(
     saveUninitialized: false, // Don't save uninitialized sessions
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Set to true in production for secure cookies
+      secure: process.env.NODE_ENV === "production", // Ensure this is true in production
       maxAge: 24 * 60 * 60 * 1000, // 1 day
+      sameSite: 'lax', // Consider using 'lax' or 'strict' for additional security
     },
   })
 );
