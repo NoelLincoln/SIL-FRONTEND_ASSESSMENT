@@ -4,7 +4,7 @@ services:
     image: lincoln1000/backend:latest
     container_name: sil-backend
     ports:
-      - "3000:3000"
+      - "5000:5000"
     environment:
       DATABASE_URL: "${DATABASE_URL}"
       GHUB_CLIENT_ID: "${GHUB_CLIENT_ID}"
