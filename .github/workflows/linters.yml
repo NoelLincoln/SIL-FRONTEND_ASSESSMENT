@@ -105,7 +105,7 @@ jobs:
       # Deploy the backend on the server
       - name: Deploy Backend
         run: |
-          docker pull lincoln1000/backend:latest
+          docker pull lincoln1000/sil-backend:latest
           docker stop backend || true
           docker rm backend || true
           docker run -d --name backend -p 3000:3000 \
