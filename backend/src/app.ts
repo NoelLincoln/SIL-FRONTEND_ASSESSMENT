@@ -24,14 +24,16 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) {return callback(null, true);}
+      if (!origin) {
+        return callback(null, true);
+      }
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true, // Allow cookies to be sent with requests
-  }),
+  })
 );
 
 // Middleware to parse JSON body
@@ -40,16 +42,25 @@ app.use(express.json());
 // Session setup
 app.use(
   session({
-    secret: "vfdfsdc3221",
+    secret: process.env.SESSION_SECRET || "vfdfsdc3221", // Use environment variable for security
     resave: false,
     saveUninitialized: false, // Don't save uninitialized sessions
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      secure: process.env.NODE_ENV === "production", // Set to true in production for secure cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
-  }),
+  })
 );
+
+// Debugging middleware to log session and cookies (remove in production)
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    console.log("Session data:", req.session);
+    console.log("Cookies:", req.cookies);
+    next();
+  });
+}
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -59,7 +70,7 @@ app.use(passport.session());
 const ensureAuthenticated = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void => {
   if (checkSession(req)) {
     return next();
@@ -78,11 +89,13 @@ app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
     if (checkSession(req)) {
-      res.json({ loggedIn: true });
+      console.log("Session valid for user:", req.user); // Debug log
+      res.json({ loggedIn: true, user: req.user });
     } else {
+      console.log("Session not found or not authenticated:", req.session); // Debug log
       res.json({ loggedIn: false });
     }
-  },
+  }
 );
 
 // Protect album and photo routes
