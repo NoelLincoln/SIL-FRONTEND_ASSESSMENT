@@ -12,10 +12,23 @@ import { checkSession } from "../src/utils/sessionUtils"; // Import session util
 const app = express();
 const prisma = new PrismaClient();
 
-// Enable CORS for the frontend
+// Allowed origins for CORS
+const allowedOrigins = [
+  "https://sil-frontend.vercel.app", // Production URL
+  "http://localhost:5173",          // Development URL
+];
+
+// Enable CORS dynamically based on the origin
 app.use(
   cors({
-    origin: "sil-frontend.vercel.app",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {return callback(null, true);}
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true, // Allow cookies to be sent with requests
   }),
 );
