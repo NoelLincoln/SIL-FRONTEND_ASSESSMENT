@@ -76,7 +76,6 @@ const Header: React.FC = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [isNavOpen, isProfileOpen]);
 
-
   return (
     <header className="bg-gray-800 text-white">
       <div className="container mx-auto flex items-center justify-between px-6">
@@ -125,7 +124,7 @@ const Header: React.FC = () => {
               {isProfileOpen && (
                 <div
                   id="profile-dropdown-menu"
-                  className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
+                  className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48 z-30"
                 >
                   <p>{email || "Loading..."}</p>
                   <button
@@ -183,7 +182,7 @@ const Header: React.FC = () => {
                 </button>
                 {isProfileOpen && (
                   <div
-                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
+                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto z-30"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <p>{email || "Loading..."}</p>
