@@ -17,6 +17,7 @@ const allowedOrigins = [
   "https://sil-frontend.vercel.app", // Production URL
   "http://localhost:5173",          // Development URL
   "https://vercel.live",
+  "https://sil-frontend-assessment.onrender.com",
 ];
 
 // Enable CORS dynamically based on the origin
