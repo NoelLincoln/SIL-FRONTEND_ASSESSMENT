@@ -103,9 +103,9 @@ app.get(
 );
 
 // Protect album and photo routes
-app.use("/api/users",ensureAuthenticated, userRoutes);
-app.use("/api/albums", ensureAuthenticated, albumRoutes);
-app.use("/api/photos", ensureAuthenticated, photoRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/albums", albumRoutes);
+app.use("/api/photos", photoRoutes);
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
