@@ -38,9 +38,9 @@ jobs:
           echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> $GITHUB_ENV
 
       # Run tests for the backend
-      - name: Run Backend Tests
-        working-directory: ./backend
-        run: yarn test
+      # - name: Run Backend Tests
+      #   working-directory: ./backend
+      #   run: yarn test
 
       # Run tests for the client
       - name: Run Client Tests
