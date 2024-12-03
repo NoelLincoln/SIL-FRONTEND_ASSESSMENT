@@ -52,7 +52,7 @@ app.use(
     saveUninitialized: false, // Don't save uninitialized sessions
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Ensure this is true in production
+      secure: true, // Ensure this is true in production
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       sameSite: 'lax', // Consider using 'lax' or 'strict' for additional security
     },
@@ -62,8 +62,8 @@ app.use(
 // Debugging middleware to log session and cookies (remove in production)
 if (process.env.NODE_ENV !== "production") {
   app.use((req, res, next) => {
-    console.log("Session data:", req.session);
-    console.log("Cookies:", req.cookies);
+    console.log("Full req obj", req)
+    console.log("Session data:", req.session.cookie);
     next();
   });
 }
@@ -94,6 +94,7 @@ app.use("/api/photos", photoRoutes);
 app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
+    console.log("Request returned",req)
     if (checkSession(req)) {
       console.log("Session valid for user:", req.user); // Debug log
       res.json({ loggedIn: true, user: req.user });
