@@ -100,7 +100,7 @@ jobs:
 
       # Push the Docker image
       - name: Push Backend Docker Image
-        run: docker push lincoln1000/backend:latest
+        run: docker push lincoln1000/sil-backend:latest
 
       # Deploy the backend on the server
       - name: Deploy Backend
