@@ -164,7 +164,7 @@ const Header: React.FC = () => {
             >
               Albums
             </a>
-            {isAuthenticated && (
+            
               <div className="relative">
                 <button
                   onClick={toggleProfile}
@@ -190,7 +190,7 @@ const Header: React.FC = () => {
                   </div>
                 )}
               </div>
-            )}
+         
           </div>
         </div>
       )}
