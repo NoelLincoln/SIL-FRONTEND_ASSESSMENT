@@ -117,7 +117,7 @@ Due to security issues, the envs can be shared on request or create your own wit
  
  ```sh
 client .env
-PROD_URL='https://sil-backend-production.onrender.com/api'
+PROD_URL='https://sil-backend-prod.onrender.com/api'
 DEV_URL='http://localhost:5000/api'
 ```
 
