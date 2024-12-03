@@ -28,9 +28,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   const [loading, setLoading] = useState(true); // Track if session fetch is in progress
 
   const backendUrl =
-    process.env.NODE_ENV === "production"
-      ? "https://sil-backend-production.onrender.com/"
-      : "http://localhost:5000";
+    process.env.REACT_APP_NODE_ENV === "production"
+      ? process.env.VITE_GHUB_CALLBACK_URL || "https://sil-backend-production.onrender.com"
+      : process.env.VITE_GHUB_CALLBACK_URL_DEV || "http://localhost:5000";
 
   useEffect(() => {
     console.log("Fetching session data...");
@@ -68,4 +68,3 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     </SessionContext.Provider>
   );
 };
-

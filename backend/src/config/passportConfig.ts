@@ -30,15 +30,23 @@ passport.deserializeUser(
   },
 );
 
+// Fetch the callback URL dynamically from environment variables
+const callbackURL =
+  process.env.NODE_ENV === "production"
+    ? process.env.VITE_GHUB_CALLBACK_URL
+    : process.env.VITE_GHUB_CALLBACK_URL_DEV;
+
+// Ensure callbackURL is set
+if (!callbackURL) {
+  throw new Error("Callback URL is not defined in environment variables.");
+}
+
 passport.use(
   new GitHubStrategy(
     {
       clientID: process.env.GHUB_CLIENT_ID!,
       clientSecret: process.env.GHUB_CLIENT_SECRET!,
-      callbackURL:
-        process.env.NODE_ENV === "production"
-          ? "https://sil-backend-production.onrender.com/api/auth/github/callback"
-          : "http://localhost:5000/api/auth/github/callback",
+      callbackURL: callbackURL,
     },
     async (
       accessToken: string,
