@@ -76,7 +76,6 @@ app.use("/api/photos", photoRoutes);
 // Session check route
 app.get(
   "/api/check-session",
-  ensureAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
     if (checkSession(req)) {
       res.json({ loggedIn: true });
