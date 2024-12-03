@@ -7,7 +7,7 @@ import LandingPage from "./components/LandingPage";
 import Home from "./components/Home";
 import UserDetails from "./components/UserDetails";
 import Albums from "./components/Albums";
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute";
 import EditPhoto from "./components/EditPhoto";
 import { RootState, AppDispatch } from "./redux/store";
 import AlbumDetails from "./components/AlbumDetails";
