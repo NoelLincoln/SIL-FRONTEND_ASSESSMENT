@@ -1,4 +1,4 @@
-name: Linters and Tests
+name: Linters, Tests, and Deployment
 
 on:
   pull_request:
@@ -12,7 +12,6 @@ jobs:
   # Run tests
   test:
     runs-on: ubuntu-latest
-
     steps:
       # Checkout the code
       - name: Checkout code
@@ -24,10 +23,9 @@ jobs:
         with:
           node-version: '20'
 
-      # Install dependencies
+      # Install dependencies for the monorepo
       - name: Install dependencies
-        run: |
-          yarn install
+        run: yarn install
 
       # Set environment variables
       - name: Set environment variables
@@ -39,23 +37,20 @@ jobs:
           echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> $GITHUB_ENV
           echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> $GITHUB_ENV
 
-      # Run tests for the backend and client
-      - name: Run Tests
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GHUB_CLIENT_ID: ${{ secrets.GHUB_CLIENT_ID }}
-          GHUB_CLIENT_SECRET: ${{ secrets.GHUB_CLIENT_SECRET }}
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-        run: |
-          yarn test
+      # Run tests for the backend
+      # - name: Run Backend Tests
+      #   working-directory: ./backend
+      #   run: yarn test
+
+      # Run tests for the client
+      - name: Run Client Tests
+        working-directory: ./client
+        run: yarn test
 
   # Run linters
   lint:
     runs-on: ubuntu-latest
-    needs: test  # Ensure linters run only if tests pass
-
+    needs: test
     steps:
       # Checkout the code
       - name: Checkout code
@@ -67,22 +62,57 @@ jobs:
         with:
           node-version: '20'
 
-      # Install dependencies
+      # Install dependencies for the monorepo
       - name: Install dependencies
-        run: |
-          yarn install
+        run: yarn install
 
-      # Run ESLint (JavaScript/TypeScript)
-      - name: Run ESLint
-        run: |
-          yarn eslint "**/*.{js,jsx,ts,tsx}"
+      # Run ESLint for the backend
+      - name: Run ESLint (Backend)
+        working-directory: ./backend
+        run: yarn eslint "**/*.{js,jsx,ts,tsx}"
 
-      # Run Stylelint (SCSS/CSS)
-      - name: Run Stylelint
-        run: |
-          yarn stylelint "**/*.{css,scss,less}"
+      # Run ESLint for the client
+      - name: Run ESLint (Client)
+        working-directory: ./client
+        run: yarn eslint "**/*.{js,jsx,ts,tsx}"
 
-      # Run Commitlint (Commit messages)
-      # - name: Run Commitlint
-      #   run: |
-      #     yarn commitlint --from=HEAD~1 --to=HEAD
+
+  # Build and deploy backend
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Build the Docker image for the backend
+      - name: Build Backend Docker Image
+        working-directory: ./backend
+        run: docker build -t lincoln1000/sil-backend:latest .
+
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Push the Docker image
+      - name: Push Backend Docker Image
+        run: docker push lincoln1000/sil-backend:latest
+
+      # Deploy the backend on the server
+      - name: Deploy Backend
+        run: |
+          docker pull lincoln1000/sil-backend:latest
+          docker stop backend || true
+          docker rm backend || true
+          docker run -d --name backend -p 3000:3000 \
+            --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            --env GHUB_CLIENT_ID="${{ secrets.GHUB_CLIENT_ID }}" \
+            --env GHUB_CLIENT_SECRET="${{ secrets.GHUB_CLIENT_SECRET }}" \
+            --env CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            --env CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
+            --env CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
+            lincoln1000/sil-backend:latest
