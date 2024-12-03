@@ -7,7 +7,7 @@ import LandingPage from "./components/LandingPage";
 import Home from "./components/Home";
 import UserDetails from "./components/UserDetails";
 import Albums from "./components/Albums";
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute";
 import EditPhoto from "./components/EditPhoto";
 import { RootState, AppDispatch } from "./redux/store";
 import AlbumDetails from "./components/AlbumDetails";
@@ -40,51 +40,51 @@ const App: React.FC = () => {
           <Route
             path="/home"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Layout>
                   <Home />
                 </Layout>
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/users/:userId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Layout>
                   <UserDetails />
                 </Layout>
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/albums/:albumId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Layout>
                   <AlbumDetails />
                 </Layout>
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/photos/edit/:photoId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Layout>
                   <EditPhoto />
                 </Layout>
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/albums"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Layout>
                   <Albums albums={albums} loading={loading} error={error} />
                 </Layout>
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
         </Routes>
