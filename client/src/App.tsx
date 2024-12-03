@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "./redux/slices/userSlice";
 import { fetchAlbums } from "./redux/slices/albumSlice";
 import LandingPage from "./components/LandingPage";
 import Home from "./components/Home";
@@ -21,7 +20,6 @@ const App: React.FC = () => {
 
   // Fetch user and album details on app start
   useEffect(() => {
-    dispatch(fetchUsers());
     dispatch(fetchAlbums());
   }, [dispatch]);
 
