@@ -17,10 +17,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
         const response = await axios.get(`${API_BASE_URL}/check-session`, {
           withCredentials: true,
         });
+        console.log("Session check response:", response.data); // Debug log
         setIsAuthenticated(response.data.loggedIn);
       } catch (error) {
         console.error("Error checking session:", error);
-        setIsAuthenticated(false);
+        setIsAuthenticated(false); 
       }
     };
 
@@ -28,8 +29,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }, [API_BASE_URL]);
 
   // Prevent rendering any content until the session status is confirmed
-  if (isAuthenticated === null) return null;
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>; // Optional: show loading while checking session
+  }
 
+  // Redirect to login page if not authenticated
   return isAuthenticated ? <>{children}</> : <Navigate to="/" />;
 };
 
