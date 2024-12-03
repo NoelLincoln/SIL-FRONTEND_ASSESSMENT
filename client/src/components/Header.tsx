@@ -3,7 +3,7 @@ import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { Link } from "react-router-dom";
-import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
+import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store";
 
 const Header: React.FC = () => {
@@ -51,13 +51,6 @@ const Header: React.FC = () => {
       console.error("Error logging out:", error);
     }
   };
-
-  useEffect(() => {
-    if (!isAuthenticated && !loading && !email) {
-      // If the user is not authenticated and there's no loading, perform the API call to fetch user data
-      dispatch(fetchAuthUser());
-    }
-  }, [dispatch, isAuthenticated, loading, email]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
