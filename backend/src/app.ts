@@ -16,6 +16,7 @@ const prisma = new PrismaClient();
 const allowedOrigins = [
   "https://sil-frontend.vercel.app", // Production URL
   "http://localhost:5173",          // Development URL
+  "https://vercel.live",
 ];
 
 // Enable CORS dynamically based on the origin
@@ -75,7 +76,6 @@ app.use("/api/photos", photoRoutes);
 // Session check route
 app.get(
   "/api/check-session",
-  ensureAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
     if (checkSession(req)) {
       res.json({ loggedIn: true });
