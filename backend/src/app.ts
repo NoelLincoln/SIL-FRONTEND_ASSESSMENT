@@ -86,15 +86,12 @@ const ensureAuthenticated = (
 
 // Routes for API
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/albums", albumRoutes);
-app.use("/api/photos", photoRoutes);
+
 
 // Session check route
 app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
-    console.log("Request returned",req)
     if (checkSession(req)) {
       console.log("Session valid for user:", req.user); // Debug log
       res.json({ loggedIn: true, user: req.user });
@@ -106,6 +103,7 @@ app.get(
 );
 
 // Protect album and photo routes
+app.use("/api/users",ensureAuthenticated, userRoutes);
 app.use("/api/albums", ensureAuthenticated, albumRoutes);
 app.use("/api/photos", ensureAuthenticated, photoRoutes);
 

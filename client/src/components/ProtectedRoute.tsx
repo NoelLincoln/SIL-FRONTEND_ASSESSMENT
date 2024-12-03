@@ -1,40 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import axios from "axios";
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useSession } from "../context/sessionContext";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+interface ProtectedRouteProps {
+  children?: React.ReactNode;
+}
 
-  // Determine the API base URL dynamically based on the environment
-  const API_BASE_URL =
-    import.meta.env.MODE === "production"
-      ? import.meta.env.VITE_PROD_URL
-      : import.meta.env.VITE_DEV_URL;
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { loggedIn } = useSession();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/check-session`, {
-          withCredentials: true,
-        });
-        console.log("Session check response:", response.data); // Debug log
-        setIsAuthenticated(response.data.loggedIn);
-      } catch (error) {
-        console.error("Error checking session:", error);
-        setIsAuthenticated(false); 
-      }
-    };
+  console.log("ProtectedRoute: loggedIn status:", loggedIn);
 
-    checkSession();
-  }, [API_BASE_URL]);
-
-  // Prevent rendering any content until the session status is confirmed
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Optional: show loading while checking session
+  if (!loggedIn) {
+    console.log("User is not logged in. Redirecting to login...");
+    return <Navigate to="/" />;
   }
 
-  // Redirect to login page if not authenticated
-  return isAuthenticated ? <>{children}</> : <Navigate to="/" />;
+  console.log("User is logged in. Rendering protected content...");
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;
