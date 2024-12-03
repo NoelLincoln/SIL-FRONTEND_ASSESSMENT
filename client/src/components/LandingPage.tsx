@@ -1,16 +1,19 @@
 import React from "react";
 
+// Function to get the backend URL based on the environment
 const getBackendUrl = (): string => {
-  if (process.env.NODE_ENV === "production") {
-    if (!process.env.VITE_GHUB_CALLBACK_URL) {
-      throw new Error("REACT_APP_GHUB_CALLBACK_URL is not defined");
+  if (import.meta.env.VITE_NODE_ENV === "production") {
+    const callbackUrl = import.meta.env.VITE_GHUB_CALLBACK_URL;
+    if (!callbackUrl) {
+      throw new Error("VITE_GHUB_CALLBACK_URL is not defined");
     }
-    return process.env.VITE_GHUB_CALLBACK_URL;
+    return callbackUrl;
   } else {
-    if (!process.env.VITE_GHUB_CALLBACK_URL_DEV) {
-      throw new Error("REACT_APP_GHUB_CALLBACK_URL_DEV is not defined");
+    const callbackUrlDev = import.meta.env.VITE_GHUB_CALLBACK_URL_DEV;
+    if (!callbackUrlDev) {
+      throw new Error("VITE_GHUB_CALLBACK_URL_DEV is not defined");
     }
-    return process.env.VITE_GHUB_CALLBACK_URL_DEV;
+    return callbackUrlDev;
   }
 };
 

@@ -33,8 +33,8 @@ passport.deserializeUser(
 // Fetch the callback URL dynamically from environment variables
 const callbackURL =
   process.env.NODE_ENV === "production"
-    ? process.env.VITE_GHUB_CALLBACK_URL
-    : process.env.VITE_GHUB_CALLBACK_URL_DEV;
+    ? process.env.GHUB_CALLBACK_URL
+    : process.env.GHUB_CALLBACK_URL_DEV;
 
 // Ensure callbackURL is set
 if (!callbackURL) {
