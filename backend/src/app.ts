@@ -100,7 +100,7 @@ app.get(
       res.json({ loggedIn: true, user: req.user });
     } else {
       console.log("Session not found or not authenticated:", req.session); // Debug log
-      res.json({ loggedIn: false });
+      res.json({ loggedIn: false, user: req.user });
     }
   }
 );
