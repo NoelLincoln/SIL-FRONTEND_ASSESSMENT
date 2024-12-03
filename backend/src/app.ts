@@ -52,7 +52,7 @@ app.use(
     saveUninitialized: false, // Don't save uninitialized sessions
     cookie: {
       httpOnly: true,
-      secure: true, // Ensure this is true in production
+      secure: process.env.NODE_ENV === "production", // Ensure this is true in production
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       sameSite: 'lax', // Consider using 'lax' or 'strict' for additional security
     },
