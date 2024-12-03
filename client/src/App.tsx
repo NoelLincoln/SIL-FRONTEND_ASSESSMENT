@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +14,7 @@ import AlbumDetails from "./components/AlbumDetails";
 import Layout from "./components/Layout"; // Import Layout
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { SessionProvider } from "./context/sessionContext"; // Import SessionProvider
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const { albums, loading, error } = useSelector((state: RootState) => state.albums);
 
   return (
-    <>
+    <SessionProvider>
       <ToastContainer />
       <Router>
         <Routes>
@@ -40,40 +40,56 @@ const App: React.FC = () => {
           <Route
             path="/home"
             element={
-              <Layout>
-                <Home />
-              </Layout>
-            } />
+              <ProtectedRoute>
+                <Layout>
+                  <Home />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/users/:userId"
-            element={<ProtectedRoute>
-              <Layout>
-                <UserDetails />
-              </Layout>
-            </ProtectedRoute>} />
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <UserDetails />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/albums/:albumId"
-            element={<ProtectedRoute>
-              <Layout>
-                <AlbumDetails />
-              </Layout>
-            </ProtectedRoute>} />
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AlbumDetails />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/photos/edit/:photoId"
-            element={<ProtectedRoute>
-              <Layout>
-                <EditPhoto />
-              </Layout>
-            </ProtectedRoute>} />
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <EditPhoto />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/albums"
-            element={<ProtectedRoute>
-              <Layout>
-                <Albums albums={albums} loading={loading} error={error} />
-              </Layout>
-            </ProtectedRoute>} />
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Albums albums={albums} loading={loading} error={error} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </Router></>
+      </Router>
+    </SessionProvider>
   );
 };
 
