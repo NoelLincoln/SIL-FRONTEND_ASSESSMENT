@@ -88,7 +88,7 @@ jobs:
 
       # Build the Docker image for the backend
       - name: Build Backend Docker Image
-        working-directory: ./backend
+        working-directory: ./
         run: docker build -t lincoln1000/sil-backend:latest .
 
       # Log in to Docker Hub

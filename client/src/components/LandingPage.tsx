@@ -1,9 +1,18 @@
 import React from "react";
 
-const getBackendUrl = (): string =>
-  process.env.NODE_ENV === "production"
-    ? "https://sil-backend-production.onrender.com/api/auth/github"
-    : "http://localhost:5000/api/auth/github";
+const getBackendUrl = (): string => {
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.VITE_GHUB_CALLBACK_URL) {
+      throw new Error("REACT_APP_GHUB_CALLBACK_URL is not defined");
+    }
+    return process.env.VITE_GHUB_CALLBACK_URL;
+  } else {
+    if (!process.env.VITE_GHUB_CALLBACK_URL_DEV) {
+      throw new Error("REACT_APP_GHUB_CALLBACK_URL_DEV is not defined");
+    }
+    return process.env.VITE_GHUB_CALLBACK_URL_DEV;
+  }
+};
 
 const LandingPage: React.FC = () => {
   const backendUrl = getBackendUrl();
