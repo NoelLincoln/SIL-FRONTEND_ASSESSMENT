@@ -39,11 +39,11 @@ const App: React.FC = () => {
           {/* Wrap other routes with the Layout component */}
           <Route
             path="/home"
-            element={<ProtectedRoute>
+            element={
               <Layout>
                 <Home />
               </Layout>
-            </ProtectedRoute>} />
+            } />
           <Route
             path="/users/:userId"
             element={<ProtectedRoute>
