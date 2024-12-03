@@ -36,6 +36,8 @@
 # 📖 SIL Frontend Engineer Assessment <a name="about-project"></a>
 
 This project is part of the SIL Frontend Engineer Assessment. It aims to showcase proficiency in frontend development by building a web application with the specified requirements.
+The client is built with React Js plus Vite and TypeScript. The API is built with Express JS with TypeScript. 
+The Main features of this application include authentication using Passport Js with Github Strategy, users can view other users in the application, create Albums and change the tile for the photos.
 
 ## 🛠 Built With <a name="built-with"></a>
 
@@ -45,6 +47,8 @@ This project is part of the SIL Frontend Engineer Assessment. It aims to showcas
   <summary>Client</summary>
   <ul>
     <li><a href="https://reactjs.org/">React.js</a></li>
+    <li><a href="https://typescriptlang.org/">TypeScript.</a></li>
+
   </ul>
 </details>
 
@@ -52,6 +56,7 @@ This project is part of the SIL Frontend Engineer Assessment. It aims to showcas
   <summary>Server</summary>
   <ul>
     <li><a href="https://expressjs.com/">Express.js</a></li>
+    <li><a href="https://typescriptlang.org/">TypeScript.</a></li>
   </ul>
 </details>
 
@@ -107,6 +112,27 @@ Install dependencies with:
 yarn install
 ```
 
+### Create .env files for client and API
+Due to security issues, the envs can be shared on request or create your own with this format:
+ 
+ ```sh
+client .env
+PROD_URL='https://sil-backend-production.onrender.com/api'
+DEV_URL='http://localhost:5000/api'
+```
+
+```sh
+Backend .env
+DATABASE_URL=""
+GHUB_CLIENT_ID=''
+GHUB_CLIENT_SECRET=''
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=''
+GHUB_CALLBACK_URL=''
+```
+
+
 ### Usage
 
 To run the project, execute the following command:
@@ -125,7 +151,7 @@ yarn test
 
 ### Deployment
 
-Deploy this project using any cloud hosting platform like Netlify, Vercel, or Heroku.
+The client is deployed on vercel, the API on render and the database on railway
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -133,7 +159,7 @@ Deploy this project using any cloud hosting platform like Netlify, Vercel, or He
 
 ## 👥 Authors <a name="authors"></a>
 
-👤 **Your Name**
+👤 **Noel Bryannt**
 
 - GitHub: [@githubhandle](https://github.com/NoelLincoln)
 - LinkedIn: [LinkedIn](https://www.linkedin.com/in/noel-bryant/)
