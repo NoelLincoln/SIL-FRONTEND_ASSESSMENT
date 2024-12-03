@@ -11,6 +11,7 @@ const baseUrl =
 // Create an axios instance with the base URL
 const axiosInstance = axios.create({
   baseURL: baseUrl,
+  withCredentials: true,
 });
 
 // Define Photo type

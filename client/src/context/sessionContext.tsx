@@ -28,13 +28,14 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   const [loading, setLoading] = useState(true); // Track if session fetch is in progress
 
   const backendUrl =
-    process.env.REACT_APP_NODE_ENV === "production"
-      ? process.env.VITE_GHUB_CALLBACK_URL || "https://sil-backend-production.onrender.com"
-      : process.env.VITE_GHUB_CALLBACK_URL_DEV || "http://localhost:5000";
+  import.meta.env.VITE_NODE_ENV === "production"
+    ? import.meta.env.VITE_PROD_URL
+    : import.meta.env.VITE_DEV_URL;
+
 
   useEffect(() => {
     console.log("Fetching session data...");
-    fetch(`${backendUrl}/api/auth/me`, {
+    fetch(`${backendUrl}/auth/me`, {
       method: "GET",
       credentials: "include",
     })
