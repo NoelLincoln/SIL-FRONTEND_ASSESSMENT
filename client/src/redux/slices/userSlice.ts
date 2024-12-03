@@ -105,7 +105,7 @@ export const fetchAlbumPhotos = createAsyncThunk<
 >("users/fetchAlbumPhotos", async (userId, { rejectWithValue }) => {
   try {
     const albumsResponse = await fetch(
-      `${baseUrl}/api/albums?userId=${userId}`,
+      `${baseUrl}/albums?userId=${userId}`,
       {
         method: "GET",
         credentials: "include",
