@@ -93,17 +93,10 @@ const allowedOrigins = [
   "http://localhost:4173",
 ];
 
-// Enable CORS dynamically based on the origin
+// Enable CORS with the allowed origins
 app.use(
   cors({
-    origin: (origin, callback) => {
-      console.log(`CORS origin check: ${origin}`);
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      console.error(`Origin not allowed: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
-    },
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
@@ -138,37 +131,6 @@ app.use("/api/auth/me", authRoutes);
 
 // Routes for API
 app.use("/api/auth", authRoutes);
-
-// Authentication middleware: Protect specific routes
-const ensureAuthenticated = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  console.log(`Checking authentication for user: ${req.user}`);
-  try {
-    const isAuthenticated = await checkSession(req);
-    if (isAuthenticated) {
-      next(); // Call the next middleware
-    } else {
-      console.log("User not authenticated");
-      res.status(401).json({ error: "Unauthorized" });
-    }
-  } catch (err) {
-    console.error("Error during authentication check:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// Session check route
-app.get("/api/check-session", async (req: Request, res: Response) => {
-  console.log("Checking session status");
-  const isAuthenticated = await checkSession(req);
-  res.json({
-    loggedIn: isAuthenticated,
-    user: isAuthenticated ? req.user : null,
-  });
-});
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);
