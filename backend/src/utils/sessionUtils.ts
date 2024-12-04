@@ -16,17 +16,18 @@ export const checkSession = async (req: express.Request): Promise<boolean> => {
   // Fetch the session from Redis
   try {
     const sessionData = await getSessionFromRedis(req.sessionID);
+    console.log("Session data from Redis", sessionData);
     if (!sessionData) {
       console.log("No session data found in Redis.");
       return false;
     }
-
-    // Check if the session has a user and is authenticated
-    if (sessionData && sessionData.user) {
-      req.user = sessionData.user; // Attach user to the request object
+  
+    // Check if the session has a passport object with a user and is authenticated
+    if (sessionData && sessionData.passport && sessionData.passport.user) {
+      req.user = sessionData.passport.user; // Attach user to the request object
       return true;
     }
-
+  
     console.log("User not authenticated in session.");
     return false;
   } catch (err) {
