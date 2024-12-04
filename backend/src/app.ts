@@ -8,9 +8,58 @@ import authRoutes from "./routes/authRoutes";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import { checkSession } from "../src/utils/sessionUtils"; // Import session utility
+import Redis from "ioredis";
 
 const app = express();
 const prisma = new PrismaClient();
+
+// Setup Redis client
+const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+
+// Create custom Redis session store
+class RedisSessionStore extends session.Store {
+  private client: Redis;
+  
+  constructor(redisClient: Redis) {
+    super();
+    this.client = redisClient;
+  }
+
+  // Get a session from Redis
+  get(sid: string, callback: (err: Error | null, session?: any) => void): void {
+    this.client.get(sid, (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+      if (!result) {
+        return callback(null, null);
+      }
+      return callback(null, JSON.parse(result));
+    });
+  }
+
+  // Set a session in Redis
+  set(sid: string, session: any, callback?: (err?: any) => void): void {
+    const ttl = session.cookie.maxAge / 1000; // Session TTL in seconds
+    this.client.setex(sid, ttl, JSON.stringify(session), callback);
+  }
+
+  // Destroy a session in Redis
+  async destroy(sid: string, callback?: (err?: any) => void): Promise<void> {
+    try {
+      // Del method returns a promise, so handle asynchronously
+      await this.client.del(sid);
+      if (callback) {
+        callback(); // Call the callback if provided
+      }
+    } catch (err) {
+      if (callback) {
+        callback(err); // Call the callback with error if any
+      }
+    }
+  }
+    
+}
 
 // Allowed origins for CORS
 const allowedOrigins = [
@@ -29,9 +78,6 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true, // Allow cookies to be sent with requests
@@ -41,12 +87,13 @@ app.use(
 // Middleware to parse JSON body
 app.use(express.json());
 
-// Session setup
+// Session setup using custom Redis store
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "vfdfsdc3221", // Use environment variable for security
     resave: false,
     saveUninitialized: false, // Don't save uninitialized sessions
+    store: new RedisSessionStore(redisClient), // Use the custom Redis store
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // Ensure this is true in production
@@ -75,7 +122,6 @@ const ensureAuthenticated = (
 // Routes for API
 app.use("/api/auth", authRoutes);
 
-
 // Session check route
 app.get(
   "/api/check-session",
@@ -101,12 +147,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
 // Graceful shutdown
 process.on("SIGINT", async () => {
   await prisma.$disconnect();
+  await redisClient.quit(); // Ensure Redis connection is closed gracefully
   process.exit(0);
 });
 
 // Start the server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 export { app, server, prisma };
