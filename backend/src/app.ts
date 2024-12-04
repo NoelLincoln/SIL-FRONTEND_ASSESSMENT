@@ -14,12 +14,17 @@ const app = express();
 const prisma = new PrismaClient();
 
 // Setup Redis client
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redisClient = new Redis(
+  process.env.REDIS_URL || "redis://localhost:6379",
+);
 
 // Create custom Redis session store
 class RedisSessionStore extends session.Store {
+  destroy(sid: string, callback?: (err?: any) => void): void {
+    throw new Error("Method not implemented.");
+  }
   private client: Redis;
-  
+
   constructor(redisClient: Redis) {
     super();
     this.client = redisClient;
@@ -52,31 +57,20 @@ class RedisSessionStore extends session.Store {
       } else {
         console.log(`Session set for SID: ${sid}`);
       }
-      if (callback) {callback(err);}
+      if (callback) {
+        callback(err);
+      }
     });
-  }
-
-  // Destroy a session in Redis
-  async destroy(sid: string, callback?: (err?: any) => void): Promise<void> {
-    console.log(`Destroying session for SID: ${sid}`);
-    try {
-      await this.client.del(sid);
-      console.log(`Session destroyed for SID: ${sid}`);
-      if (callback) {callback();}
-    } catch (err) {
-      console.error(`Error destroying session for SID: ${sid}`, err);
-      if (callback) {callback(err);}
-    }
   }
 }
 
 // Allowed origins for CORS
 const allowedOrigins = [
-  "https://sil-frontend.vercel.app", // Production URL
-  "http://localhost:5173",          // Development URL
+  "https://sil-frontend.vercel.app",
+  "http://localhost:5173",
   "https://vercel.live",
   "https://sil-frontend-assessment.onrender.com",
-  "http://localhost:4173"
+  "http://localhost:4173",
 ];
 
 // Enable CORS dynamically based on the origin
@@ -90,8 +84,8 @@ app.use(
       console.error(`Origin not allowed: ${origin}`);
       callback(new Error("Not allowed by CORS"));
     },
-    credentials: true, // Allow cookies to be sent with requests
-  })
+    credentials: true,
+  }),
 );
 
 // Middleware to parse JSON body
@@ -100,17 +94,17 @@ app.use(express.json());
 // Session setup using custom Redis store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "vfdfsdc3221", // Use environment variable for security
+    secret: process.env.SESSION_SECRET || "vfdfsdc3221",
     resave: false,
-    saveUninitialized: false, // Don't save uninitialized sessions
-    store: new RedisSessionStore(redisClient), // Use the custom Redis store
+    saveUninitialized: false,
+    store: new RedisSessionStore(redisClient),
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Ensure this is true in production
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      sameSite: 'lax', // Consider using 'lax' or 'strict' for additional security
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
     },
-  })
+  }),
 );
 
 // Initialize Passport
@@ -121,7 +115,7 @@ app.use(passport.session());
 const ensureAuthenticated = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   console.log(`Checking session for user: ${req.user}`);
   if (checkSession(req)) {
@@ -139,32 +133,32 @@ app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
     console.log("Checking session status");
+    console.log("Checking session status");
     if (checkSession(req)) {
+      console.log("User is logged in");
       console.log("User is logged in");
       res.json({ loggedIn: true, user: req.user });
     } else {
       console.log("User is not logged in");
-      res.json({ loggedIn: false, user: req.user });
+      res.json({ loggedIn: false });
     }
-  }
+  },
 );
 
 // Protect album and photo routes
+app.use("/api/users", ensureAuthenticated, userRoutes);
 app.use("/api/users", ensureAuthenticated, userRoutes);
 app.use("/api/albums", ensureAuthenticated, albumRoutes);
 app.use("/api/photos", ensureAuthenticated, photoRoutes);
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-  console.error("Global error handler:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-  console.log("Gracefully shutting down...");
   await prisma.$disconnect();
-  await redisClient.quit(); // Ensure Redis connection is closed gracefully
   process.exit(0);
 });
 
@@ -173,5 +167,4 @@ const PORT = process.env.PORT || 10000;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
 export { app, server, prisma };

@@ -7,14 +7,13 @@ import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store";
 import { toast } from "react-toastify";
 
-
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   // Access the user email, authentication state, and loading/error from Redux
   const { email, isAuthenticated, loading, error } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const dispatch = useDispatch<AppDispatch>();
@@ -169,33 +168,32 @@ const Header: React.FC = () => {
             >
               Albums
             </a>
-            
-              <div className="relative">
-                <button
-                  onClick={toggleProfile}
-                  className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
+
+            <div className="relative">
+              <button
+                onClick={toggleProfile}
+                className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
+              >
+                <FaUserCircle size={24} />
+                <span>Profile</span>
+              </button>
+              {isProfileOpen && (
+                <div
+                  className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto z-30"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <FaUserCircle size={24} />
-                  <span>Profile</span>
-                </button>
-                {isProfileOpen && (
-                  <div
-                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto z-30"
-                    onClick={(e) => e.stopPropagation()}
+                  <p>{email || "Loading..."}</p>
+                  <button
+                    className="text-red-500 mt-2"
+                    onClick={handleLogout}
+                    disabled={loading}
                   >
-                    <p>{email || "Loading..."}</p>
-                    <button
-                      className="text-red-500 mt-2"
-                      onClick={handleLogout}
-                      disabled={loading}
-                    >
-                      {loading ? "Logging out..." : "Logout"}
-                    </button>
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
-                  </div>
-                )}
-              </div>
-         
+                    {loading ? "Logging out..." : "Logout"}
+                  </button>
+                  {error && <p className="text-red-500 mt-2">{error}</p>}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

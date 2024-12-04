@@ -8,7 +8,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, loading } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
   if (loading) {
     return <div>Loading...</div>;

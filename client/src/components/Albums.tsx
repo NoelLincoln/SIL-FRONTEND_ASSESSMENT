@@ -48,7 +48,11 @@ const Albums: React.FC = () => {
 
     setIsSubmitting(true);
 
-    const albumData = { title: albumTitle, userId: "user-id-placeholder", files: albumPhotos };
+    const albumData = {
+      title: albumTitle,
+      userId: "user-id-placeholder",
+      files: albumPhotos,
+    };
 
     try {
       await dispatch(createAlbum(albumData)).unwrap();
@@ -106,43 +110,48 @@ const Albums: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {albums.slice().reverse().map((album) => (
-              <div
-                key={album.id}
-                className="p-4 border border-gray-300 rounded-lg shadow-sm transition hover:shadow-lg"
-              >
-                <h2 className="font-bold text-lg mb-2">{album.title}</h2>
-                <p className="mb-2 text-sm">
-                  Created by:{" "}
-                  <a
-                    href={`/users/${album.userId}`}
-                    className="text-blue-500 hover:underline"
-                  >
-                    {album.username}
-                  </a>
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  {album.photos.length > 0 ? (
-                    album.photos.map((photo) => (
-                      <img
-                        key={photo.id}
-                        src={photo.imageUrl}
-                        alt={`Album ${album.title} - ${photo.title}`}
-                        className="w-32 h-32 object-cover rounded"
-                      />
-                    ))
-                  ) : (
-                    <p className="text-gray-500 italic">No photos available</p>
-                  )}
-                </div>
-                <a
-                  href={`/albums/${album.id}`}
-                  className="text-blue-500 hover:underline mt-4 block"
+            {albums
+              .slice()
+              .reverse()
+              .map((album) => (
+                <div
+                  key={album.id}
+                  className="p-4 border border-gray-300 rounded-lg shadow-sm transition hover:shadow-lg"
                 >
-                  View Album
-                </a>
-              </div>
-            ))}
+                  <h2 className="font-bold text-lg mb-2">{album.title}</h2>
+                  <p className="mb-2 text-sm">
+                    Created by:{" "}
+                    <a
+                      href={`/users/${album.userId}`}
+                      className="text-blue-500 hover:underline"
+                    >
+                      {album.username}
+                    </a>
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    {album.photos.length > 0 ? (
+                      album.photos.map((photo) => (
+                        <img
+                          key={photo.id}
+                          src={photo.imageUrl}
+                          alt={`Album ${album.title} - ${photo.title}`}
+                          className="w-32 h-32 object-cover rounded"
+                        />
+                      ))
+                    ) : (
+                      <p className="text-gray-500 italic">
+                        No photos available
+                      </p>
+                    )}
+                  </div>
+                  <a
+                    href={`/albums/${album.id}`}
+                    className="text-blue-500 hover:underline mt-4 block"
+                  >
+                    View Album
+                  </a>
+                </div>
+              ))}
           </div>
         )}
       </div>

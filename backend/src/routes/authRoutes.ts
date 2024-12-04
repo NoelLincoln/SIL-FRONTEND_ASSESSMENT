@@ -30,9 +30,7 @@ router.get(
         name: user.name, // Include other relevant fields if available
       };
       // Redirect to frontend with user info in query parameters
-      res.redirect(
-        `${frontendUrl}/home`
-      );
+      res.redirect(`${frontendUrl}/home`);
     } else {
       // Fallback to standard redirect if no user info is available
       res.redirect(`${frontendUrl}/home`);
@@ -59,8 +57,6 @@ router.get("/logout", (req, res, next) => {
     });
   });
 });
-
-
 
 // Check if the user is logged in and return the user's details
 router.get("/me", (req, res) => {

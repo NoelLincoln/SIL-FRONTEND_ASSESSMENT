@@ -32,10 +32,10 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
       await axios.get(`${baseUrl}/auth/logout`, { withCredentials: true });
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Error logging out. Please try again."
+        error.response?.data || "Error logging out. Please try again.",
       );
     }
-  }
+  },
 );
 
 // Async thunk for fetching authenticated user details
@@ -51,7 +51,7 @@ export const fetchAuthUser = createAsyncThunk<
     return response.data;
   } catch (error: any) {
     return rejectWithValue(
-      error.response?.data || "Error fetching user details."
+      error.response?.data || "Error fetching user details.",
     );
   }
 });
