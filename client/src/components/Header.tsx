@@ -47,11 +47,14 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       // Dispatch the logoutUser action to perform logout API call
-      await dispatch(logoutUser());
+      await dispatch(logoutUser());  
       toast.success("Logged out successfully!"); // Toast notification
-      window.location.href = "/";
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 5000); // Delay to allow toast notification to show before redirect
+
     } catch (error) {
-      toast.error("Failed to log out. Please try again."); // Toast notification
+      toast.error("Failed to log out. Please try again."); // Show error toast
       console.error("Error logging out handle logout:", error);
     }
   };
