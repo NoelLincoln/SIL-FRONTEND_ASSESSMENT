@@ -8,65 +8,100 @@ import authRoutes from "./routes/authRoutes";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import { checkSession } from "../src/utils/sessionUtils"; // Import session utility
+import Redis from "ioredis";
 
 const app = express();
 const prisma = new PrismaClient();
 
-// Log the NODE_ENV to verify it's set correctly
-console.log("NODE_ENV:", process.env.NODE_ENV);
+// Setup Redis client
+const redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+
+// Create custom Redis session store
+class RedisSessionStore extends session.Store {
+  destroy(sid: string, callback?: (err?: any) => void): void {
+    throw new Error("Method not implemented.");
+  }
+  private client: Redis;
+
+  constructor(redisClient: Redis) {
+    super();
+    this.client = redisClient;
+  }
+
+  // Get a session from Redis
+  get(sid: string, callback: (err: Error | null, session?: any) => void): void {
+    console.log(`Getting session for SID: ${sid}`);
+    this.client.get(sid, (err, result) => {
+      if (err) {
+        console.error("Error fetching session:", err);
+        return callback(err);
+      }
+      if (!result) {
+        console.log(`No session found for SID: ${sid}`);
+        return callback(null, null);
+      }
+      console.log(`Session fetched for SID: ${sid}`);
+      return callback(null, JSON.parse(result));
+    });
+  }
+
+  // Set a session in Redis
+  set(sid: string, session: any, callback?: (err?: any) => void): void {
+    const ttl = session.cookie.maxAge / 1000; // Session TTL in seconds
+    console.log(`Setting session for SID: ${sid} with TTL: ${ttl}s`);
+    this.client.setex(sid, ttl, JSON.stringify(session), (err) => {
+      if (err) {
+        console.error(`Error setting session for SID: ${sid}`, err);
+      } else {
+        console.log(`Session set for SID: ${sid}`);
+      }
+      if (callback) {callback(err);}
+    });
+  }
+}
 
 // Allowed origins for CORS
 const allowedOrigins = [
-  "https://sil-frontend.vercel.app", // Production URL
-  "http://localhost:5173",          // Development URL
+  "https://sil-frontend.vercel.app",
+  "http://localhost:5173",
   "https://vercel.live",
   "https://sil-frontend-assessment.onrender.com",
-  "http://localhost:4173"
+  "http://localhost:4173",
 ];
 
 // Enable CORS dynamically based on the origin
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) {
+      console.log(`Received request from origin: ${origin}`);
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+      console.error(`Origin not allowed: ${origin}`);
       callback(new Error("Not allowed by CORS"));
     },
-    credentials: true, // Allow cookies to be sent with requests
+    credentials: true,
   })
 );
 
 // Middleware to parse JSON body
 app.use(express.json());
 
-// Session setup
+// Session setup using custom Redis store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "vfdfsdc3221", // Use environment variable for security
+    secret: process.env.SESSION_SECRET || "vfdfsdc3221",
     resave: false,
-    saveUninitialized: false, // Don't save uninitialized sessions
+    saveUninitialized: false,
+    store: new RedisSessionStore(redisClient),
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Ensure this is true in production
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      sameSite: 'lax', // Consider using 'lax' or 'strict' for additional security
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
     },
   })
 );
-
-// Debugging middleware to log session and cookies (remove in production)
-if (process.env.NODE_ENV !== "production") {
-  app.use((req, res, next) => {
-    console.log("Full req obj", req)
-    console.log("Session data:", req.session.cookie);
-    next();
-  });
-}
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -78,50 +113,53 @@ const ensureAuthenticated = (
   res: Response,
   next: NextFunction
 ): void => {
+  console.log(`Checking session for user: ${req.user}`);
   if (checkSession(req)) {
     return next();
   }
+  console.log("Unauthorized access attempt");
   res.status(401).json({ error: "Unauthorized" });
 };
 
 // Routes for API
 app.use("/api/auth", authRoutes);
 
-
 // Session check route
 app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
+    console.log("Checking session status");
     if (checkSession(req)) {
-      console.log("Session valid for user:", req.user); // Debug log
+      console.log("User is logged in");
       res.json({ loggedIn: true, user: req.user });
     } else {
-      console.log("Session not found or not authenticated:", req.session); // Debug log
-      res.json({ loggedIn: false, user: req.user });
+      console.log("User is not logged in");
+      res.json({ loggedIn: false });
     }
   }
 );
 
 // Protect album and photo routes
-app.use("/api/users",ensureAuthenticated, userRoutes);
+app.use("/api/users", ensureAuthenticated, userRoutes);
 app.use("/api/albums", ensureAuthenticated, albumRoutes);
 app.use("/api/photos", ensureAuthenticated, photoRoutes);
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-  console.error(err.stack);
+  console.error("Global error handler:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-  console.log("Shutting down server...");
+  console.log("Gracefully shutting down...");
   await prisma.$disconnect();
+  await redisClient.quit();
   process.exit(0);
 });
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
