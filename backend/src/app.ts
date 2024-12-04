@@ -120,19 +120,18 @@ app.use(
   }),
 );
 
+
+// ** Skip authentication for /api/auth/me route before passport initialization **
+app.use("/api/auth/me", authRoutes);
+
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Skip authentication for /api/auth/me route
-app.use("/api/auth/me", authRoutes);
-
-app.use("/api/albums", albumRoutes);
-
-
 
 // Routes for API
 app.use("/api/auth", authRoutes);
+app.use("/api/albums", albumRoutes);
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);
