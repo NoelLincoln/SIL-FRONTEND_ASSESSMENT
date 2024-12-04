@@ -130,6 +130,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Skip authentication for /api/auth/me route
+app.use("/api/auth/me", authRoutes);
+
 // Routes for API
 app.use("/api/auth", authRoutes);
 
@@ -163,9 +166,6 @@ app.get("/api/check-session", async (req: Request, res: Response) => {
     user: isAuthenticated ? req.user : null,
   });
 });
-
-// Skip authentication for /api/auth/me route
-app.use("/api/auth/me", authRoutes);
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);
