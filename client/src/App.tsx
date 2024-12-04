@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { fetchAlbums } from "./redux/slices/albumSlice";
 import { fetchUsers } from "./redux/slices/userSlice";
 
-import { fetchAuthUser } from "./redux/slices/authSlice";
+// import { fetchAuthUser } from "./redux/slices/authSlice";
 import LandingPage from "./components/LandingPage";
 import Home from "./components/Home";
 import UserDetails from "./components/UserDetails";
@@ -22,7 +22,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Fetch user authentication state on app load
-    dispatch(fetchAuthUser());
+    // dispatch(fetchAuthUser());
     dispatch(fetchUsers());
     // Fetch albums
     dispatch(fetchAlbums());
