@@ -23,7 +23,6 @@ export const uploadImage = async (
   try {
     // Upload the image to Cloudinary
     const result = await cloudinary.uploader.upload(imagePath, options);
-    console.log(result); // For debugging purposes
 
     if (result?.secure_url) {
       // Save the image URL to the database
@@ -34,13 +33,11 @@ export const uploadImage = async (
           albumId,
         },
       });
-      console.log("Photo saved to database:", newPhoto); // For debugging purposes
       return result.public_id;
     }
 
     throw new Error("Image upload failed: No secure URL returned.");
   } catch (error) {
-    console.error("Error uploading image to Cloudinary:", error);
     return undefined;
   }
 };
@@ -53,10 +50,8 @@ export const getAssetInfo = async (publicId: string) => {
 
   try {
     const result = await cloudinary.api.resource(publicId, options);
-    console.log(result); // For debugging purposes
     return result.colors;
   } catch (error) {
-    console.error("Error retrieving asset info:", error);
     return [];
   }
 };

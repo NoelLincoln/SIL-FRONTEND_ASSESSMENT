@@ -27,7 +27,6 @@ export const fetchPhotoById = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/photos/${id}`); // Use axios instance here
-      console.log("photo slice fetch by id", response.data);
       return response.data; // Returning the fetched photo data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch photo");
