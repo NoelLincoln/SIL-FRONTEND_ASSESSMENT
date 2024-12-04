@@ -11,6 +11,7 @@ type SerializedUser = {
 
 // Explicitly type the user for Passport's serializeUser and deserializeUser
 passport.serializeUser(function (user, done) {
+  console.log("Serializing user: ", user);
   done(null, user);
 });
 
@@ -20,11 +21,13 @@ passport.deserializeUser(
     done: (err: any, user?: PrismaUser | null) => void,
   ) => {
     try {
+      console.log("Deserializing user: ", serializedUser);
       const user = await prisma.user.findUnique({
         where: { id: serializedUser.id },
       });
       done(null, user || null); // Pass the user object or null if not found
     } catch (err) {
+      console.error("Error during deserialization: ", err);
       done(err, null);
     }
   },
@@ -55,6 +58,7 @@ passport.use(
       done: (err: any, user?: PrismaUser | false | null) => void,
     ) => {
       try {
+        console.log("GitHub login for user: ", profile.username);
         let user = await prisma.user.findUnique({
           where: { githubId: profile.id },
         });
@@ -70,8 +74,10 @@ passport.use(
           });
         }
 
+        console.log("User found or created: ", user);
         return done(null, user);
       } catch (err) {
+        console.error("Error during GitHub authentication: ", err);
         return done(err, null);
       }
     },
