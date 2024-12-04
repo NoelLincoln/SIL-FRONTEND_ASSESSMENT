@@ -15,14 +15,11 @@ const prisma = new PrismaClient();
 
 // Setup Redis client
 const redisClient = new Redis(
-  process.env.REDIS_URL || "redis://localhost:6379",
+  process.env.REDIS_URL || "redis://localhost:6379"
 );
 
 // Create custom Redis session store
 class RedisSessionStore extends session.Store {
-  destroy(sid: string, callback?: (err?: any) => void): void {
-    throw new Error("Method not implemented.");
-  }
   private client: Redis;
 
   constructor(redisClient: Redis) {
@@ -30,9 +27,25 @@ class RedisSessionStore extends session.Store {
     this.client = redisClient;
   }
 
+  // Set a session in Redis
+  set(sid: string, session: any, callback?: (err?: any) => void): void {
+    const ttl = Math.floor(session.cookie.maxAge / 1000); // Session TTL in seconds
+    console.log(`Setting session for SID: ${sid} with TTL: ${ttl}s`);
+    this.client.setex(sid, ttl, JSON.stringify(session), (err) => {
+      if (err) {
+        console.error(`Error setting session for SID: ${sid}`, err);
+      } else {
+        console.log(`Session set for SID: ${sid}`);
+      }
+      if (callback) {
+        callback(err);
+      }
+    });
+  }
+
   // Get a session from Redis
   get(sid: string, callback: (err: Error | null, session?: any) => void): void {
-    console.log(`Getting session for SID: ${sid}`);
+    console.log(`Fetching session for SID: ${sid}`);
     this.client.get(sid, (err, result) => {
       if (err) {
         console.error("Error fetching session:", err);
@@ -47,15 +60,14 @@ class RedisSessionStore extends session.Store {
     });
   }
 
-  // Set a session in Redis
-  set(sid: string, session: any, callback?: (err?: any) => void): void {
-    const ttl = session.cookie.maxAge / 1000; // Session TTL in seconds
-    console.log(`Setting session for SID: ${sid} with TTL: ${ttl}s`);
-    this.client.setex(sid, ttl, JSON.stringify(session), (err) => {
+  // Implement the destroy method to delete a session from Redis
+  destroy(sid: string, callback?: (err?: any) => void): void {
+    console.log(`Destroying session for SID: ${sid}`);
+    this.client.del(sid, (err) => {
       if (err) {
-        console.error(`Error setting session for SID: ${sid}`, err);
+        console.error(`Error destroying session for SID: ${sid}`, err);
       } else {
-        console.log(`Session set for SID: ${sid}`);
+        console.log(`Session destroyed for SID: ${sid}`);
       }
       if (callback) {
         callback(err);
@@ -63,6 +75,7 @@ class RedisSessionStore extends session.Store {
     });
   }
 }
+
 
 // Allowed origins for CORS
 const allowedOrigins = [
@@ -77,7 +90,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log(`Received request from origin: ${origin}`);
+      console.log(`CORS origin check: ${origin}`);
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -85,7 +98,7 @@ app.use(
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-  }),
+  })
 );
 
 // Middleware to parse JSON body
@@ -104,7 +117,7 @@ app.use(
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: "lax",
     },
-  }),
+  })
 );
 
 // Initialize Passport
@@ -112,16 +125,17 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Authentication middleware: Protect specific routes
-const ensureAuthenticated = (
+const ensureAuthenticated = async (
   req: Request,
   res: Response,
-  next: NextFunction,
-): void => {
-  console.log(`Checking session for user: ${req.user}`);
-  if (checkSession(req)) {
+  next: NextFunction
+): Promise<void> => {
+  console.log(`Checking authentication for request: ${req.user}`);
+  const isAuthenticated = await checkSession(req);
+  if (isAuthenticated) {
     return next();
   }
-  console.log("Unauthorized access attempt");
+  console.log("Unauthorized request");
   res.status(401).json({ error: "Unauthorized" });
 };
 
@@ -133,38 +147,32 @@ app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
     console.log("Checking session status");
-    console.log("Checking session status");
-    if (checkSession(req)) {
-      console.log("User is logged in");
+    const isAuthenticated = await checkSession(req);
+    if (isAuthenticated) {
       console.log("User is logged in");
       res.json({ loggedIn: true, user: req.user });
     } else {
       console.log("User is not logged in");
       res.json({ loggedIn: false });
     }
-  },
+  }
 );
 
 // Protect album and photo routes
-app.use("/api/users", ensureAuthenticated, userRoutes);
-app.use("/api/users", ensureAuthenticated, userRoutes);
-app.use("/api/albums", ensureAuthenticated, albumRoutes);
-app.use("/api/photos", ensureAuthenticated, photoRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/albums", albumRoutes);
+app.use("/api/photos", photoRoutes);
 
-// Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-  res.status(500).json({ error: "Internal Server Error" });
+// Global error handler for async errors
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error("Global error handler: ", err);
+  res.status(500).json({ error: "Internal server error" });
 });
 
-// Graceful shutdown
-process.on("SIGINT", async () => {
-  await prisma.$disconnect();
-  process.exit(0);
+// Set the port and listen
+const port = process.env.PORT || 10000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
 
-// Start the server
-const PORT = process.env.PORT || 10000;
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-export { app, server, prisma };
+export default app;
