@@ -172,7 +172,7 @@ app.get("/api/check-session", async (req: Request, res: Response) => {
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);
-app.use("/api/photos", ensureAuthenticated, photoRoutes);
+app.use("/api/photos", photoRoutes);
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
