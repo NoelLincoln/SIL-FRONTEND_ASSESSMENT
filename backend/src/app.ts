@@ -89,6 +89,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://vercel.live",
   "https://sil-frontend-assessment.onrender.com",
+  "https://sil-frontend-byh8jp2gi-noellincolns-projects.vercel.app",
   "http://localhost:4173",
 ];
 
@@ -130,6 +131,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use("/api/albums", albumRoutes);
+
 // Skip authentication for /api/auth/me route
 app.use("/api/auth/me", authRoutes);
 
@@ -169,7 +172,6 @@ app.get("/api/check-session", async (req: Request, res: Response) => {
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);
-app.use("/api/albums", ensureAuthenticated, albumRoutes);
 app.use("/api/photos", ensureAuthenticated, photoRoutes);
 
 // Global error handler
