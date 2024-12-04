@@ -1,22 +1,24 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useSession } from "../context/sessionContext";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { loggedIn } = useSession();
+  const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
+  console.log("Auth state",isAuthenticated)
 
-  console.log("ProtectedRoute: loggedIn status:", loggedIn);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  if (!loggedIn) {
-    console.log("User is not logged in. Redirecting to login...");
+  if (!isAuthenticated) {
     return <Navigate to="/" />;
   }
 
-  console.log("User is logged in. Rendering protected content...");
   return children ? <>{children}</> : <Outlet />;
 };
 
