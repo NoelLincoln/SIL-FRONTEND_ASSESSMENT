@@ -6,8 +6,6 @@ import { RootState } from "../store"; // Assuming you have a RootState defined f
 const devUrl = import.meta.env.VITE_DEV_URL;
 const prodUrl = import.meta.env.VITE_PROD_URL;
 
-console.log("Dev url",devUrl)
-
 interface Photo {
   id: string;
   title: string;
