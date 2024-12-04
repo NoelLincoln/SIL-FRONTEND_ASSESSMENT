@@ -89,6 +89,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://vercel.live",
   "https://sil-frontend-assessment.onrender.com",
+  "https://sil-frontend-byh8jp2gi-noellincolns-projects.vercel.app",
   "http://localhost:4173",
 ];
 
