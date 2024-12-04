@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { fetchAlbums } from "../redux/slices/albumSlice";
 import { fetchUsers } from "../redux/slices/userSlice";
 import { AppDispatch } from "../redux/store";
-import { fetchAuthUser } from "../redux/slices/authSlice";
+// import { fetchAuthUser } from "../redux/slices/authSlice";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -39,14 +39,14 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         console.error("Error fetching albums:", error);
       });
 
-      dispatch(fetchAuthUser())
-    .unwrap()
-      .then(() => {
-        console.log("Auth user found succesfully");
-      })
-      .catch((error) => {
-        console.error("Error fetching auth users:", error);
-      });
+    //   dispatch(fetchAuthUser())
+    // .unwrap()
+    //   .then(() => {
+    //     console.log("Auth user found succesfully");
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error fetching auth users:", error);
+    //   });
 
   }, [dispatch]);
 
