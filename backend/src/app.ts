@@ -75,7 +75,6 @@ class RedisSessionStore extends session.Store {
   }
 }
 
-
 // Allowed origins for CORS
 const allowedOrigins = [
   "https://sil-frontend.vercel.app",
@@ -134,8 +133,6 @@ const ensureAuthenticated = async (
   if (isAuthenticated) {
     return next();
   }
-  console.log("Unauthorized request");
-  res.status(401).json({ error: "Unauthorized" });
 };
 
 // Routes for API
@@ -163,8 +160,14 @@ app.use("/api/albums", ensureAuthenticated, albumRoutes);
 app.use("/api/photos", ensureAuthenticated, photoRoutes);
 
 // Global error handler for async errors
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error("Global error handler: ", err);
+
+  // Check if error is a known error type or have a custom message
+  if (res.headersSent) {
+    return next(err); 
+  }
+
   res.status(500).json({ error: "Internal server error" });
 });
 
