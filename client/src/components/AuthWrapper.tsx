@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { fetchAuthUser } from "../redux/slices/authSlice";
+// import { fetchAuthUser } from "../redux/slices/authSlice";
 import { fetchAlbums } from "../redux/slices/albumSlice";
 import { fetchUsers } from "../redux/slices/userSlice";
 import { AppDispatch } from "../redux/store";
@@ -14,7 +14,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
   useEffect(() => {
     // Fetch authentication and necessary global data
-    dispatch(fetchAuthUser());
+    // dispatch(fetchAuthUser());
     dispatch(fetchUsers());
     dispatch(fetchAlbums());
   }, [dispatch]);
