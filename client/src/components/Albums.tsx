@@ -1,31 +1,22 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 import { createAlbum } from "../redux/slices/albumSlice";
-import { AppDispatch } from "../redux/store";
-import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 
-interface Photo {
-  id: string;
-  title: string;
-  imageUrl: string;
-}
+// interface Photo {
+//   id: string;
+//   title: string;
+//   imageUrl: string;
+// }
 
-interface Album {
-  id: string;
-  title: string;
-  userId: string;
-  photos: Photo[];
-  username: string;
-}
-
-interface AlbumsProps {
-  albums: Album[];
-  loading: boolean;
-  error: string | null;
-}
-
-const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
+const Albums: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const {
+    albums,
+    loading: albumsLoading,
+    error: albumsError,
+  } = useSelector((state: RootState) => state.albums);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [albumTitle, setAlbumTitle] = useState("");
@@ -57,7 +48,11 @@ const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
 
     setIsSubmitting(true);
 
-    const albumData = { title: albumTitle, userId: "user-id-placeholder", files: albumPhotos };
+    const albumData = {
+      title: albumTitle,
+      userId: "user-id-placeholder",
+      files: albumPhotos,
+    };
 
     try {
       await dispatch(createAlbum(albumData)).unwrap();
@@ -77,7 +72,7 @@ const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
     }
   };
 
-  if (error) {
+  if (albumsError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-sm">
@@ -87,7 +82,7 @@ const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
             className="mx-auto mb-4 w-24"
           />
           <h2 className="text-2xl font-semibold text-red-500">Oops!</h2>
-          <p className="text-gray-700 mt-2">{error}</p>
+          <p className="text-gray-700 mt-2">{albumsError}</p>
         </div>
       </div>
     );
@@ -105,7 +100,7 @@ const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
           </button>
         </div>
 
-        {loading ? (
+        {albumsLoading ? (
           <div className="flex justify-center items-center mt-6">
             <div className="w-8 h-8 border-4 border-t-4 border-blue-600 border-solid rounded-full animate-spin"></div>
           </div>
@@ -115,44 +110,48 @@ const Albums: React.FC<AlbumsProps> = ({ albums, loading, error }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {albums.slice().reverse().map((album: Album) => (
-  <div
-    key={album.id}
-    className="p-4 border border-gray-300 rounded-lg shadow-sm transition hover:shadow-lg"
-  >
-    <h2 className="font-bold text-lg mb-2">{album.title}</h2>
-    <p className="mb-2 text-sm">
-      Created by:{" "}
-      <a
-        href={`/users/${album.userId}`}
-        className="text-blue-500 hover:underline"
-      >
-        {album.username}
-      </a>
-    </p>
-    <div className="flex flex-wrap gap-4">
-      {album.photos.length > 0 ? (
-        album.photos.map((photo) => (
-          <img
-            key={photo.id}
-            src={photo.imageUrl}
-            alt={`Album ${album.title} - ${photo.title}`}
-            className="w-32 h-32 object-cover rounded"
-          />
-        ))
-      ) : (
-        <p className="text-gray-500 italic">No photos available</p>
-      )}
-    </div>
-    <a
-      href={`/albums/${album.id}`}
-      className="text-blue-500 hover:underline mt-4 block"
-    >
-      View Album
-    </a>
-  </div>
-))}
-
+            {albums
+              .slice()
+              .reverse()
+              .map((album) => (
+                <div
+                  key={album.id}
+                  className="p-4 border border-gray-300 rounded-lg shadow-sm transition hover:shadow-lg"
+                >
+                  <h2 className="font-bold text-lg mb-2">{album.title}</h2>
+                  <p className="mb-2 text-sm">
+                    Created by:{" "}
+                    <a
+                      href={`/users/${album.userId}`}
+                      className="text-blue-500 hover:underline"
+                    >
+                      {album.username}
+                    </a>
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    {album.photos.length > 0 ? (
+                      album.photos.map((photo) => (
+                        <img
+                          key={photo.id}
+                          src={photo.imageUrl}
+                          alt={`Album ${album.title} - ${photo.title}`}
+                          className="w-32 h-32 object-cover rounded"
+                        />
+                      ))
+                    ) : (
+                      <p className="text-gray-500 italic">
+                        No photos available
+                      </p>
+                    )}
+                  </div>
+                  <a
+                    href={`/albums/${album.id}`}
+                    className="text-blue-500 hover:underline mt-4 block"
+                  >
+                    View Album
+                  </a>
+                </div>
+              ))}
           </div>
         )}
       </div>

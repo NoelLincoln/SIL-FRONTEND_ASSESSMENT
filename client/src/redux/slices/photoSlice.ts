@@ -4,10 +4,7 @@ import axios from "axios";
 const devUrl = import.meta.env.VITE_DEV_URL;
 const prodUrl = import.meta.env.VITE_PROD_URL;
 // Set base URL based on environment
-const baseUrl =
-  process.env.NODE_ENV === "production"
-    ? prodUrl
-    : devUrl;
+const baseUrl = process.env.NODE_ENV === "production" ? prodUrl : devUrl;
 // Create an axios instance with the base URL
 const axiosInstance = axios.create({
   baseURL: baseUrl,
@@ -27,12 +24,11 @@ export const fetchPhotoById = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/photos/${id}`); // Use axios instance here
-      console.log("photo slice fetch by id", response.data);
       return response.data; // Returning the fetched photo data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch photo");
     }
-  }
+  },
 );
 
 // Async thunk for updating the photo title
@@ -45,7 +41,7 @@ export const updatePhotoTitle = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to update title");
     }
-  }
+  },
 );
 
 // Initial state for the slice
@@ -91,7 +87,9 @@ const photoSlice = createSlice({
         state.loading = false;
         const updatedPhoto: Photo = action.payload;
         // Update the title of the specific photo in the state
-        const index = state.photos.findIndex((photo) => photo.id === updatedPhoto.id);
+        const index = state.photos.findIndex(
+          (photo) => photo.id === updatedPhoto.id,
+        );
         if (index !== -1) {
           state.photos[index] = updatedPhoto;
         }

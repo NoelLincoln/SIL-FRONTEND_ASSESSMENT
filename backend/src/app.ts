@@ -14,7 +14,9 @@ const app = express();
 const prisma = new PrismaClient();
 
 // Setup Redis client
-const redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+const redisClient = new Redis(
+  process.env.REDIS_URL || "redis://localhost:6379",
+);
 
 // Create custom Redis session store
 class RedisSessionStore extends session.Store {
@@ -55,7 +57,9 @@ class RedisSessionStore extends session.Store {
       } else {
         console.log(`Session set for SID: ${sid}`);
       }
-      if (callback) {callback(err);}
+      if (callback) {
+        callback(err);
+      }
     });
   }
 }
@@ -81,7 +85,7 @@ app.use(
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-  })
+  }),
 );
 
 // Middleware to parse JSON body
@@ -100,7 +104,7 @@ app.use(
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: "lax",
     },
-  })
+  }),
 );
 
 // Initialize Passport
@@ -111,7 +115,7 @@ app.use(passport.session());
 const ensureAuthenticated = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   console.log(`Checking session for user: ${req.user}`);
   if (checkSession(req)) {
@@ -129,32 +133,32 @@ app.get(
   "/api/check-session",
   async (req: Request, res: Response): Promise<void> => {
     console.log("Checking session status");
+    console.log("Checking session status");
     if (checkSession(req)) {
+      console.log("User is logged in");
       console.log("User is logged in");
       res.json({ loggedIn: true, user: req.user });
     } else {
       console.log("User is not logged in");
       res.json({ loggedIn: false });
     }
-  }
+  },
 );
 
 // Protect album and photo routes
+app.use("/api/users", ensureAuthenticated, userRoutes);
 app.use("/api/users", ensureAuthenticated, userRoutes);
 app.use("/api/albums", ensureAuthenticated, albumRoutes);
 app.use("/api/photos", ensureAuthenticated, photoRoutes);
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-  console.error("Global error handler:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-  console.log("Gracefully shutting down...");
   await prisma.$disconnect();
-  await redisClient.quit();
   process.exit(0);
 });
 
@@ -163,5 +167,4 @@ const PORT = process.env.PORT || 10000;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
 export { app, server, prisma };

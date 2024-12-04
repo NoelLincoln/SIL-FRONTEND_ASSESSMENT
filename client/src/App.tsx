@@ -1,42 +1,42 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "./redux/slices/userSlice";
+import { useDispatch } from "react-redux";
 import { fetchAlbums } from "./redux/slices/albumSlice";
+import { fetchUsers } from "./redux/slices/userSlice";
+
+import { fetchAuthUser } from "./redux/slices/authSlice";
 import LandingPage from "./components/LandingPage";
 import Home from "./components/Home";
 import UserDetails from "./components/UserDetails";
 import Albums from "./components/Albums";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditPhoto from "./components/EditPhoto";
-import { RootState, AppDispatch } from "./redux/store";
 import AlbumDetails from "./components/AlbumDetails";
-import Layout from "./components/Layout"; // Import Layout
+import Layout from "./components/Layout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SessionProvider } from "./context/sessionContext"; // Import SessionProvider
+import { AppDispatch } from "./redux/store";
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  // Fetch user and album details on app start
   useEffect(() => {
+    // Fetch user authentication state on app load
+    dispatch(fetchAuthUser());
     dispatch(fetchUsers());
+    // Fetch albums
     dispatch(fetchAlbums());
   }, [dispatch]);
 
-  // Get albums and loading state from Redux store
-  const { albums, loading, error } = useSelector((state: RootState) => state.albums);
-
   return (
-    <SessionProvider>
+    <>
       <ToastContainer />
       <Router>
         <Routes>
-          {/* Landing page doesn't need the layout */}
+          {/* Public route */}
           <Route path="/" element={<LandingPage />} />
 
-          {/* Wrap other routes with the Layout component */}
+          {/* Protected routes */}
           <Route
             path="/home"
             element={
@@ -82,14 +82,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <Albums albums={albums} loading={loading} error={error} />
+                  <Albums />
                 </Layout>
               </ProtectedRoute>
             }
           />
         </Routes>
       </Router>
-    </SessionProvider>
+    </>
   );
 };
 

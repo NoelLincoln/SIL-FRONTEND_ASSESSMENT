@@ -4,8 +4,8 @@ import React from "react";
 const getBackendUrl = (): string => {
   const isProduction = import.meta.env.VITE_NODE_ENV === "production";
   return isProduction
-    ? import.meta.env.VITE_GHUB_CALLBACK_URL_DEV || ""
-    : import.meta.env.VITE_GHUB_CALLBACK_URL || "";
+    ? import.meta.env.VITE_GHUB_CALLBACK_URL || ""
+    : import.meta.env.VITE_GHUB_CALLBACK_URL_DEV || "";
 };
 
 const LandingPage: React.FC = () => {

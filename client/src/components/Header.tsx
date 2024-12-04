@@ -3,8 +3,9 @@ import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { Link } from "react-router-dom";
-import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
+import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store";
+import { toast } from "react-toastify";
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -12,7 +13,7 @@ const Header: React.FC = () => {
 
   // Access the user email, authentication state, and loading/error from Redux
   const { email, isAuthenticated, loading, error } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const dispatch = useDispatch<AppDispatch>();
@@ -47,17 +48,13 @@ const Header: React.FC = () => {
     try {
       // Dispatch the logoutUser action to perform logout API call
       await dispatch(logoutUser());
+      toast.success("Logged out successfully!"); // Toast notification
+      window.location.href = "/";
     } catch (error) {
-      console.error("Error logging out:", error);
+      toast.error("Failed to log out. Please try again."); // Toast notification
+      console.error("Error logging out handle logout:", error);
     }
   };
-
-  useEffect(() => {
-    if (!isAuthenticated && !loading && !email) {
-      // If the user is not authenticated and there's no loading, perform the API call to fetch user data
-      dispatch(fetchAuthUser());
-    }
-  }, [dispatch, isAuthenticated, loading, email]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -171,33 +168,32 @@ const Header: React.FC = () => {
             >
               Albums
             </a>
-            {isAuthenticated && (
-              <div className="relative">
-                <button
-                  onClick={toggleProfile}
-                  className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
+
+            <div className="relative">
+              <button
+                onClick={toggleProfile}
+                className="flex items-center space-x-2 w-full text-left text-lg font-medium hover:text-gray-400"
+              >
+                <FaUserCircle size={24} />
+                <span>Profile</span>
+              </button>
+              {isProfileOpen && (
+                <div
+                  className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto z-30"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <FaUserCircle size={24} />
-                  <span>Profile</span>
-                </button>
-                {isProfileOpen && (
-                  <div
-                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto z-30"
-                    onClick={(e) => e.stopPropagation()}
+                  <p>{email || "Loading..."}</p>
+                  <button
+                    className="text-red-500 mt-2"
+                    onClick={handleLogout}
+                    disabled={loading}
                   >
-                    <p>{email || "Loading..."}</p>
-                    <button
-                      className="text-red-500 mt-2"
-                      onClick={handleLogout}
-                      disabled={loading}
-                    >
-                      {loading ? "Logging out..." : "Logout"}
-                    </button>
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
-                  </div>
-                )}
-              </div>
-            )}
+                    {loading ? "Logging out..." : "Logout"}
+                  </button>
+                  {error && <p className="text-red-500 mt-2">{error}</p>}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
