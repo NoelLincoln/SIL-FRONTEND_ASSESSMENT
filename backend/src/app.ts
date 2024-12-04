@@ -130,6 +130,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Routes for API
+app.use("/api/auth", authRoutes);
+
 // Authentication middleware: Protect specific routes
 const ensureAuthenticated = async (
   req: Request,
@@ -151,9 +154,6 @@ const ensureAuthenticated = async (
   }
 };
 
-// Routes for API
-app.use("/api/auth", authRoutes);
-
 // Session check route
 app.get("/api/check-session", async (req: Request, res: Response) => {
   console.log("Checking session status");
@@ -163,6 +163,9 @@ app.get("/api/check-session", async (req: Request, res: Response) => {
     user: isAuthenticated ? req.user : null,
   });
 });
+
+// Skip authentication for /api/auth/me route
+app.use("/api/auth/me", authRoutes);
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);
