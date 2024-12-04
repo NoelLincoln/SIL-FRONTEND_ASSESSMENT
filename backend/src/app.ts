@@ -124,10 +124,12 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/albums", albumRoutes);
-
 // Skip authentication for /api/auth/me route
 app.use("/api/auth/me", authRoutes);
+
+app.use("/api/albums", albumRoutes);
+
+
 
 // Routes for API
 app.use("/api/auth", authRoutes);
