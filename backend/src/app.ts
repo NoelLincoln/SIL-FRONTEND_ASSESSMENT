@@ -11,7 +11,6 @@ import { checkSession } from "../src/utils/sessionUtils"; // Import session util
 import Redis from "ioredis";
 
 const app = express();
-const prisma = new PrismaClient();
 
 // Setup Redis client
 const redisClient = new Redis(
@@ -159,12 +158,12 @@ app.get(
 );
 
 // Protect album and photo routes
-app.use("/api/users", userRoutes);
-app.use("/api/albums", albumRoutes);
-app.use("/api/photos", photoRoutes);
+app.use("/api/users", ensureAuthenticated, userRoutes);
+app.use("/api/albums", ensureAuthenticated, albumRoutes);
+app.use("/api/photos", ensureAuthenticated, photoRoutes);
 
 // Global error handler for async errors
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
   console.error("Global error handler: ", err);
   res.status(500).json({ error: "Internal server error" });
 });
