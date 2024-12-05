@@ -7,6 +7,4 @@ services:
     container_name: sil-backend
     ports:
       - "5000:5000"
-    env_file:
-      - .env
     restart: always
