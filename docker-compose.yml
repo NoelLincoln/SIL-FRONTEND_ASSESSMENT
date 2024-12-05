@@ -10,7 +10,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: 'postgresql://postgres:5150@postgres:5432/sildb'  # Use the postgres service name
+      DATABASE_URL: 'postgresql://postgres:5150@host.docker.internal:5432/sildb'  # Use host.docker.internal to access the host DB
       GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
       GHUB_CLIENT_SECRET: 'ee1118dc5b82cb7f2573ef641fe217e420fcf9cd'
       CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'
@@ -20,22 +20,7 @@ services:
       REDIS_URL: 'rediss://red-ct7te356l47c73cbhi10:XuJMAWejmpt3dYz8xrqfpUZRz3TZlkmE@oregon-redis.render.com:6379'
     restart: always
     networks:
-      - sil_network  # Optionally use a custom network
-
-  postgres:
-    image: postgres:13
-    container_name: sil-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: qwerrtyui
-      POSTGRES_DB: sildb
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: always
-    networks:
-      - sil_network  # Optionally use a custom network
+      - sil_network
 
 volumes:
   postgres_data:
@@ -43,4 +28,4 @@ volumes:
 
 networks:
   sil_network:
-    driver: bridge  # Optionally use a custom network
+    driver: bridge
