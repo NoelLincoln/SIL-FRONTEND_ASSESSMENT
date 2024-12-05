@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .  
+      dockerfile: Dockerfile 
+    image: lincoln1000/sil-backend:latest 
+    container_name: sil-backend 
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: 'postgresql://postgres:JvXANRSJXzHsDGgRNksNoChNKLJbdPnt@postgres.railway.internal:5432/railway'
+      GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
+      GHUB_CLIENT_SECRET: 'ee1118dc5b82cb7f2573ef641fe217e420fcf9cd'
+      CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'
+      CLOUDINARY_API_KEY: '784574139734844'
+      CLOUDINARY_API_SECRET: 'Nu70HTehzjICDH9Js-9LPERMpKI'
+      PROD_CALLBACK_URL: 'https://sil-frontend-assessment.vercel.app/api/auth/github/callback'
+      GHUB_CALLBACK_URL: 'https://sil-backend-prod.onrender.com/api/auth/github/callback'
+      GHUB_CALLBACK_URL_DEV: 'http://localhost:10000/api/auth/github/callback'
+      NODE_ENV: 'production'
+      REDIS_URL: 'rediss://red-ct7te356l47c73cbhi10:XuJMAWejmpt3dYz8xrqfpUZRz3TZlkmE@oregon-redis.render.com:6379'
+      SESSION_SECRET: 'vfdfsdc3221'
+    restart: always
+
+  postgres:
+    image: postgres:13
+    container_name: sil-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: railway
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
+    driver: local
