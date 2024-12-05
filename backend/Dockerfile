@@ -4,14 +4,17 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 # Copy package.json and yarn.lock
-COPY backend/package*.json ./ 
-COPY backend/yarn.lock ./ 
+COPY package*.json ./ 
+COPY yarn.lock ./ 
 
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
 # Copy the rest of the server application
-COPY backend/ ./ 
+COPY . .
+
+#copy .env
+COPY .env .env
 
 # Generate Prisma Client
 RUN yarn prisma generate
