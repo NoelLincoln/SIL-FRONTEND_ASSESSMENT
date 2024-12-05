@@ -67,40 +67,65 @@ jobs:
 
   # Build and deploy backend using Docker Compose
   deploy-backend:
-    runs-on: ubuntu-latest
     needs: lint
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
-      # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Install Docker Compose
       - name: Install Docker Compose
         run: |
-          curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
+          docker-compose version
 
-      # Log in to Docker Hub
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Fix Docker Permissions
+        run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
 
-      # Build the backend Docker image using Docker Compose
-      - name: Build Backend Docker Image
-        run: docker-compose build backend
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # Push the Docker image using Docker Compose
-      - name: Push Backend Docker Image
-        run: docker-compose push backend
+      - name: Build and Push Server Image
+        run: |
+          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t lincoln1000/bns-mern:server -f server/Dockerfile .
+          docker push lincoln1000/bns-mern:server
 
-      # Deploy the backend on the server using Docker Compose
-      - name: Deploy Backend with Docker Compose
+  deploy:
+    needs: deploy-backend
+    runs-on: self-hosted
+    steps:
+      - name: Install Docker
+        run: |
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get update
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y docker.io
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl start docker
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl enable docker
+          docker --version
+
+      - name: Install Docker Compose
+        run: |
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
+          docker-compose version
+
+      - name: Fix Docker Permissions
+        run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
+
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Deploy with Docker Compose
         run: |
           docker-compose down || true
-          docker-compose up -d 
+          docker-compose pull
+          docker-compose up -d
+
+      - name: Cleanup unused containers and images
+        run: |
+          docker system prune -f --volumes

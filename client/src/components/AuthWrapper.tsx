@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-// import { fetchAuthUser } from "../redux/slices/authSlice";
+import { fetchAuthUser } from "../redux/slices/authSlice";
 import { fetchAlbums } from "../redux/slices/albumSlice";
 import { fetchUsers } from "../redux/slices/userSlice";
 import { AppDispatch } from "../redux/store";
-// import { fetchAuthUser } from "../redux/slices/authSlice";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -20,7 +19,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     
 
     // Dispatch actions for authentication and data fetching
-    // dispatch(fetchAuthUser()); // Uncomment if needed
     dispatch(fetchUsers())
       .unwrap()
       .then(() => {
@@ -39,14 +37,14 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         console.error("Error fetching albums:", error);
       });
 
-    //   dispatch(fetchAuthUser())
-    // .unwrap()
-    //   .then(() => {
-    //     console.log("Auth user found succesfully");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching auth users:", error);
-    //   });
+      dispatch(fetchAuthUser())
+    .unwrap()
+      .then(() => {
+        console.log("Auth user found succesfully");
+      })
+      .catch((error) => {
+        console.error("Error fetching auth users:", error);
+      });
 
   }, [dispatch]);
 
