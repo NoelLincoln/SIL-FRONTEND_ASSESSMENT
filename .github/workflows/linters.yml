@@ -96,29 +96,33 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
+      - name: Set environment variables
+        run: |
+            echo "Setting environment variables..."
+            export DATABASE_URL=${{ secrets.DATABASE_URL }}
+            export GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}
+            export GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}
+            export CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            export CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+            export CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+
       - name: Set up Docker Compose
         run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose version
+            sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            docker-compose version
 
-      - name: Deploy with Docker Compose
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GHUB_CLIENT_ID: ${{ secrets.GHUB_CLIENT_ID }}
-          GHUB_CLIENT_SECRET: ${{ secrets.GHUB_CLIENT_SECRET }}
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      - name: Clean up old containers and networks
         run: |
-          # Clean up any old containers and networks first
-          docker-compose -f ./docker-compose.yml down
+            docker-compose -f ./docker-compose.yml down
 
-          # Build and start the services
-          docker-compose -f ./docker-compose.yml up -d --build
+      - name: Build and start the services
+        run: |
+            docker-compose -f ./docker-compose.yml up -d --build
 
-          # Check for errors in Docker Compose logs
-          docker-compose -f ./docker-compose.yml logs -f
+      - name: Check for errors in Docker Compose logs
+        run: |
+            docker-compose -f ./docker-compose.yml logs -f
 
       - name: Cleanup unused containers and images
         run: docker system prune -f --volumes
