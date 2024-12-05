@@ -1,16 +1,19 @@
-name: Deploy Sil Backend and Frontend
+name: Linters, Tests, and Deployment
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
 
 jobs:
-  # Run tests for client and backend
+  # Run tests
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source
+      - name: Checkout code
         uses: actions/checkout@v3
 
       # Set up Node.js
@@ -28,12 +31,12 @@ jobs:
         working-directory: ./client
         run: yarn test
 
-  # Run linters for backend and frontend
+  # Run linters
   lint:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Checkout Source
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -52,67 +55,80 @@ jobs:
         working-directory: ./client
         run: yarn eslint "**/*.{js,jsx,ts,tsx}"
 
-  # Build backend and push Docker image
-  build:
+  # Build and deploy backend using Docker Compose
+  deploy-backend:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Install Docker Compose
-        run: |
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
-          docker-compose version
-
-      - name: Fix Docker Permissions
-        run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
-
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build and Push Backend Docker Image
+      - name: Ensure .env file exists and create it
         run: |
-          docker-compose -f docker-compose.yml build backend
-          docker-compose -f docker-compose.yml push backend
+          echo "Ensuring .env file exists for backend..."
+          if [ ! -f ./backend/.env ]; then
+            echo ".env file not found. Creating a new one..."
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./backend/.env
+            echo "GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}" >> ./backend/.env
+            echo "GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}" >> ./backend/.env
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> ./backend/.env
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> ./backend/.env
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> ./backend/.env
+          else
+            echo ".env file already exists."
+          fi
 
-  # Deploy the backend and frontend using Docker Compose
+      - name: Build and Push Server Image
+        working-directory: .
+        run: |
+          docker build \
+            --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --build-arg GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }} \
+            --build-arg GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }} \
+            --build-arg CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }} \
+            --build-arg CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }} \
+            --build-arg CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \
+            -t lincoln1000/sil-backend:latest \
+            ./backend
+
+          docker push lincoln1000/sil-backend:latest
+
   deploy:
-    needs: build
-    runs-on: self-hosted
+    needs: deploy-backend
+    runs-on: ubuntu-latest
     steps:
-      - name: Install Docker
-        run: |
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get update
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y docker.io
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl start docker
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl enable docker
-          docker --version
-
-      - name: Install Docker Compose
-        run: |
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
-          docker-compose version
-
-      - name: Fix Docker Permissions
-        run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
-
       - name: Checkout Source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
 
       - name: Deploy with Docker Compose
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GHUB_CLIENT_ID: ${{ secrets.GHUB_CLIENT_ID }}
+          GHUB_CLIENT_SECRET: ${{ secrets.GHUB_CLIENT_SECRET }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
-          docker-compose down || true
-          docker-compose pull
-          docker-compose up -d
+          # Clean up any old containers and networks first
+          docker-compose -f docker-compose.yml down || true
+
+          # Build and start the services
+          docker-compose -f docker-compose.yml up -d --build
+
+          # Check for errors in Docker Compose logs
+          docker-compose -f docker-compose.yml logs -f
 
       - name: Cleanup unused containers and images
-        run: |
-          docker system prune -f --volumes
+        run: docker system prune -f --volumes
