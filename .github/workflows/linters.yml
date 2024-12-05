@@ -122,13 +122,13 @@ jobs:
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           # Clean up any old containers and networks first
-          docker-compose down
+          docker-compose ./docker-compose.yml down
 
           # Build and start the services
-          docker-compose up -d --build
+          docker-compose ./docker-compose.yml up -d --build
 
           # Check for errors in Docker Compose logs
-          docker-compose logs -f
+          docker-compose ./docker-compose.yml logs -f
 
       - name: Cleanup unused containers and images
         run: docker system prune -f --volumes
