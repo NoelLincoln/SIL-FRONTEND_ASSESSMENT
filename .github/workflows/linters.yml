@@ -95,7 +95,7 @@ jobs:
             --build-arg CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }} \
             --build-arg CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \
             -t lincoln1000/sil-backend:latest \
-            .
+            ./backend
 
           docker push lincoln1000/sil-backend:latest
 
