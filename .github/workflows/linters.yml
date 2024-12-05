@@ -90,8 +90,8 @@ jobs:
 
       - name: Build and Push Server Image
         run: |
-          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t lincoln1000/bns-mern:server -f backend/Dockerfile .
-          docker push lincoln1000/bns-mern:server
+          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t lincoln1000/sil-backend:server -f backend/Dockerfile .
+          docker push lincoln1000/sil-backend:server
 
   deploy:
     needs: deploy-backend
