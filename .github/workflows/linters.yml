@@ -73,15 +73,12 @@ jobs:
         run: |
           echo "Setting up .env file for backend..."
           if [ ! -f ./backend/.env ]; then
-            echo "Creating .env file..."
-            cat <<EOF > ./backend/.env
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}
-            GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}
-            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
-            CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
-            CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
-              EOF
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > ./backend/.env
+            echo "GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}" >> ./backend/.env
+            echo "GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}" >> ./backend/.env
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> ./backend/.env
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> ./backend/.env
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> ./backend/.env
           else
             echo ".env file already exists."
           fi
@@ -89,9 +86,7 @@ jobs:
       - name: Build and Push Server Image
         working-directory: ./backend
         run: |
-          docker build \
-            -t lincoln1000/sil-backend:latest .
-
+          docker build -t lincoln1000/sil-backend:latest .
           docker push lincoln1000/sil-backend:latest
 
   deploy:
