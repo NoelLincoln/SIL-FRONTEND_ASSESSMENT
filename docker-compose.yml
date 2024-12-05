@@ -1,7 +1,7 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: ./backend/Dockerfile
     image: lincoln1000/sil-backend:latest
     container_name: sil-backend
