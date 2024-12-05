@@ -107,8 +107,8 @@ jobs:
 
       - name: Deploy with Docker Compose
         run: |
-          docker-compose -f backend/docker-compose.yml down || true
-          docker-compose -f backend/docker-compose.yml up -d --build
+          docker-compose -f docker-compose.yml down || true
+          docker-compose -f docker-compose.yml up -d --build
 
       - name: Cleanup unused containers and images
         run: |
