@@ -9,9 +9,8 @@ services:
     container_name: sil-backend
     ports:
       - "5000:5000"
-    
     environment:
-      DATABASE_URL: 'postgresql://postgres:5150@localhost:5432/sildb'
+      DATABASE_URL: 'postgresql://postgres:5150@postgres:5432/sildb'  # Use the postgres service name
       GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
       GHUB_CLIENT_SECRET: 'ee1118dc5b82cb7f2573ef641fe217e420fcf9cd'
       CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'
@@ -20,6 +19,8 @@ services:
       NODE_ENV: production
       REDIS_URL: 'rediss://red-ct7te356l47c73cbhi10:XuJMAWejmpt3dYz8xrqfpUZRz3TZlkmE@oregon-redis.render.com:6379'
     restart: always
+    networks:
+      - sil_network  # Optionally use a custom network
 
   postgres:
     image: postgres:13
@@ -33,7 +34,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
+    networks:
+      - sil_network  # Optionally use a custom network
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  sil_network:
+    driver: bridge  # Optionally use a custom network
