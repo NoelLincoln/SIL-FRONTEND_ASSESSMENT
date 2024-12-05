@@ -85,7 +85,7 @@ jobs:
           fi
 
       - name: Build and Push Server Image
-        working-directory: ./backend
+        working-directory: .
         run: |
           docker build \
             --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
