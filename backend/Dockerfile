@@ -13,14 +13,6 @@ RUN yarn install --frozen-lockfile
 # Copy the rest of the server application
 COPY backend/ ./ 
 
-# Set environment variables at build time
-ARG DATABASE_URL
-ARG GHUB_CLIENT_ID
-ARG GHUB_CLIENT_SECRET
-ARG CLOUDINARY_CLOUD_NAME
-ARG CLOUDINARY_API_KEY
-ARG CLOUDINARY_API_SECRET
-
 # Generate Prisma Client
 RUN yarn prisma generate
 
