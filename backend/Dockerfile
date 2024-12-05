@@ -11,7 +11,7 @@ COPY backend/yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 # Copy the rest of the server application
-COPY backend/ ./ 
+COPY . .
 
 # Generate Prisma Client
 RUN yarn prisma generate
