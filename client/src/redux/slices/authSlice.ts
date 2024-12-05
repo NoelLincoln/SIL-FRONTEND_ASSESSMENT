@@ -61,6 +61,7 @@ export const fetchAuthUser = createAsyncThunk<
 });
 
 // Create the auth slice
+// Updated authSlice with suggested fixes
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -69,53 +70,52 @@ const authSlice = createSlice({
       state.id = null;
       state.email = null;
       state.isAuthenticated = false;
-      state.loading = false; // Ensure loading is set to false
+      state.loading = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAuthUser.pending, (state) => {
-        console.log("Fetching user details..."); // Log before fetching starts
-        state.loading = true; // Set loading to true when the request starts
+        console.log("Fetching user details...");
+        state.loading = true;
         state.error = null;
       })
       .addCase(fetchAuthUser.fulfilled, (state, action) => {
-        console.log("Fetched user details successfully:", action.payload); // Log successful data
-        state.loading = false; // Set loading to false when the request succeeds
+        console.log("Fetched user details successfully:", action.payload);
+        state.loading = false;
         state.id = action.payload.id || null;
         state.email = action.payload.email || null;
         state.isAuthenticated = true;
       })
       .addCase(fetchAuthUser.rejected, (state, action) => {
-        console.error("Failed to fetch authentication state:", action.payload); // Log failure
-        state.loading = false; // Ensure loading is set to false on failure
+        console.error("Failed to fetch authentication state:", action.payload);
+        state.loading = false;
         state.error = action.payload || "Failed to fetch authentication state.";
         state.isAuthenticated = false;
       })
       .addCase(logoutUser.pending, (state) => {
-        console.log("Logging out user..."); // Log before logout starts
+        console.log("Logging out user...");
         state.loading = true;
         state.error = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        console.log("User logged out successfully"); // Log successful logout
+        console.log("User logged out successfully");
         state.loading = false;
         state.id = null;
         state.email = null;
         state.isAuthenticated = false;
-        // Redirect user to the landing page
-        window.location.href = "/";
+        // Ensure logout action is dispatched to reset the state
+        // state.logout();
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        console.error("Failed to log out:", action.payload); // Log failure
+        console.error("Failed to log out:", action.payload);
         state.loading = false;
         state.error = action.payload || "Logout failed. Please try again.";
       });
   },
 });
 
-// Export the logout action
 export const { logout } = authSlice.actions;
-
-// Export the reducer
 export default authSlice.reducer;
+
