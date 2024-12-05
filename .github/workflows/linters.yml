@@ -69,14 +69,20 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Create .env file for backend
+      - name: Ensure .env file exists and create it
         run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./backend/.env
-          echo "GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}" >> ./backend/.env
-          echo "GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}" >> ./backend/.env
-          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> ./backend/.env
-          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> ./backend/.env
-          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> ./backend/.env
+          echo "Ensuring .env file exists for backend..."
+          if [ ! -f ./backend/.env ]; then
+            echo ".env file not found. Creating a new one..."
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./backend/.env
+            echo "GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}" >> ./backend/.env
+            echo "GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}" >> ./backend/.env
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> ./backend/.env
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> ./backend/.env
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> ./backend/.env
+          else
+            echo ".env file already exists."
+          fi
 
       - name: Build and Push Server Image
         working-directory: ./backend
@@ -115,8 +121,14 @@ jobs:
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
+          # Clean up any old containers and networks first
           docker-compose -f docker-compose.yml down || true
+
+          # Build and start the services
           docker-compose -f docker-compose.yml up -d --build
+
+          # Check for errors in Docker Compose logs
+          docker-compose -f docker-compose.yml logs -f
 
       - name: Cleanup unused containers and images
         run: docker system prune -f --volumes
