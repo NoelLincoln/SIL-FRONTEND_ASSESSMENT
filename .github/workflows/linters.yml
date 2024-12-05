@@ -95,7 +95,7 @@ jobs:
             --build-arg CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }} \
             --build-arg CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \
             -t lincoln1000/sil-backend:latest \
-            .
+            ./backend  # Adjusted to the backend directory
 
           docker push lincoln1000/sil-backend:latest
 
@@ -122,13 +122,13 @@ jobs:
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           # Clean up any old containers and networks first
-          docker-compose -f docker-compose.yml down || true
+          docker-compose -f ./backend/docker-compose.yml down || true
 
           # Build and start the services
-          docker-compose -f docker-compose.yml up -d --build
+          docker-compose -f ./backend/docker-compose.yml up -d --build
 
           # Check for errors in Docker Compose logs
-          docker-compose -f docker-compose.yml logs -f
+          docker-compose -f ./backend/docker-compose.yml logs -f
 
       - name: Cleanup unused containers and images
         run: docker system prune -f --volumes
