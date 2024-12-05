@@ -13,6 +13,9 @@ RUN yarn install --frozen-lockfile
 # Copy the rest of the server application
 COPY . .
 
+#copy .env
+COPY .env .env
+
 # Generate Prisma Client
 RUN yarn prisma generate
 
