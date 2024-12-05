@@ -26,16 +26,6 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      # Set environment variables
-      - name: Set environment variables
-        run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-          echo "GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}" >> $GITHUB_ENV
-          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> $GITHUB_ENV
-          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> $GITHUB_ENV
-          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> $GITHUB_ENV
-
       # Run tests for the client
       - name: Run Client Tests
         working-directory: ./client
@@ -76,22 +66,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Install Docker Compose
-        run: |
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
-          docker-compose version
-
-      - name: Fix Docker Permissions
-        run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
-
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and Push Server Image
+        working-directory: ./backend
         run: |
-          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t lincoln1000/sil-backend:server -f backend/Dockerfile .
-          docker push lincoln1000/sil-backend:server
+          docker build \
+            --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --build-arg GHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }} \
+            --build-arg GHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }} \
+            --build-arg CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }} \
+            --build-arg CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }} \
+            --build-arg CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \
+            -t lincoln1000/sil-backend:latest \
+            .
+
+          docker push lincoln1000/sil-backend:latest
 
   deploy:
     needs: deploy-backend
@@ -114,17 +105,10 @@ jobs:
       - name: Fix Docker Permissions
         run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
 
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
       - name: Deploy with Docker Compose
         run: |
-          docker-compose down || true
-          docker-compose pull
-          docker-compose up -d
+          docker-compose -f backend/docker-compose.yml down || true
+          docker-compose -f backend/docker-compose.yml up -d --build
 
       - name: Cleanup unused containers and images
         run: |
