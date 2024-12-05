@@ -86,30 +86,28 @@ jobs:
 
   deploy:
     needs: deploy-backend
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Install Docker
-        run: |
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get update
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y docker.io
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl start docker
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl enable docker
-          docker --version
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
-      - name: Install Docker Compose
+      - name: Set up Docker Compose
         run: |
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
+          sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-      - name: Fix Docker Permissions
-        run: echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chown $USER /var/run/docker.sock
-
       - name: Deploy with Docker Compose
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GHUB_CLIENT_ID: ${{ secrets.GHUB_CLIENT_ID }}
+          GHUB_CLIENT_SECRET: ${{ secrets.GHUB_CLIENT_SECRET }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           docker-compose -f docker-compose.yml down || true
           docker-compose -f docker-compose.yml up -d --build
 
       - name: Cleanup unused containers and images
-        run: |
-          docker system prune -f --volumes
+        run: docker system prune -f --volumes
