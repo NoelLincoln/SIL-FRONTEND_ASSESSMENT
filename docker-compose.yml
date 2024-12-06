@@ -8,7 +8,7 @@ services:
     image: lincoln1000/sil-backend:latest
     container_name: sil-backend
     ports:
-      - "5000:5000"
+      - "10000:10000"
     environment:
       DATABASE_URL: 'postgresql://sil_db_user:dAf1rSEZ13AzdaLIGUFBmeJd7DlIt46B@dpg-ct8699t2ng1s73f21u20-a.oregon-postgres.render.com/sil_db'
       GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
