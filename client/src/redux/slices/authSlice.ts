@@ -5,6 +5,7 @@ import axios from "axios";
 interface AuthState {
   id: string | null; // 'id' can be a string or null
   email: string | null;
+  name: string | null; // Added name field
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -14,6 +15,7 @@ interface AuthState {
 const initialState: AuthState = {
   id: null,
   email: null,
+  name: null, // Initialize name
   isAuthenticated: false,
   loading: true, // Set loading to true initially
   error: null,
@@ -32,43 +34,51 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
       await axios.get(`${baseUrl}/auth/logout`, { withCredentials: true });
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Error logging out. Please try again.",
+        error.response?.data || "Error logging out. Please try again."
       );
     }
-  },
+  }
 );
 
 // Async thunk for fetching authenticated user details
-// Async thunk for fetching authenticated user details
 export const fetchAuthUser = createAsyncThunk<
-  { id: string; email: string }, // Payload type
-  void, // No argument passed
-  { rejectValue: string } // Reject value type
+  { id: string; email: string },
+  void,
+  { rejectValue: string }
 >("auth/fetchAuthUser", async (_, { rejectWithValue }) => {
   try {
-    console.log("Fetching authenticated user details..."); // Log request initiation
+    console.log("Fetching authenticated user details...");
     const response = await axios.get(`${baseUrl}/auth/me`, {
       withCredentials: true,
     });
-    console.log("User details fetched successfully:", response.data); // Log successful response
+    console.log("User details fetched successfully:", response.data);
     return response.data;
   } catch (error: any) {
-    console.error("Error fetching user details:", error); // Log error
+    console.error("Error fetching user details:", error);
     return rejectWithValue(
-      error.response?.data || "Error fetching user details.",
+      error.response?.data || "Error fetching user details."
     );
   }
 });
 
 // Create the auth slice
-// Updated authSlice with suggested fixes
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    // New reducer to set the authentication state
+    setAuthState: (state, action) => {
+      const { id, email, name } = action.payload;
+      state.id = id;
+      state.email = email;
+      state.name = name;
+      state.isAuthenticated = true;
+      state.loading = false;
+    },
     logout(state) {
       state.id = null;
       state.email = null;
+      state.name = null; // Clear name on logout
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
@@ -104,9 +114,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.id = null;
         state.email = null;
+        state.name = null; // Clear name on logout
         state.isAuthenticated = false;
-        // Ensure logout action is dispatched to reset the state
-        // state.logout();
       })
       .addCase(logoutUser.rejected, (state, action) => {
         console.error("Failed to log out:", action.payload);
@@ -116,6 +125,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { setAuthState, logout } = authSlice.actions;
 export default authSlice.reducer;
-

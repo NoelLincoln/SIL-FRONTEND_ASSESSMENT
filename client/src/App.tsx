@@ -16,8 +16,8 @@ const App: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <AuthWrapper>
         <Router>
+        <AuthWrapper>
           <Routes>
             {/* Public route */}
             <Route path="/" element={<LandingPage />} />
@@ -74,8 +74,8 @@ const App: React.FC = () => {
               }
             />
           </Routes>
+          </AuthWrapper>
         </Router>
-      </AuthWrapper>
     </>
   );
 };
