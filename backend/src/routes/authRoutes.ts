@@ -21,18 +21,20 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: `${frontendUrl}/` }),
   (req, res) => {
-    // Include user details in the query string for frontend access
     if (req.user) {
       const user = req.user as User;
       const userInfo = {
         id: user.id,
         email: user.email,
-        name: user.name, // Include other relevant fields if available
+        name: user.name,
       };
-      // Redirect to frontend with user info in query parameters
-      res.redirect(`${frontendUrl}/home`);
+
+      // Convert userInfo to query string
+      const queryString = new URLSearchParams(userInfo).toString();
+
+      // Redirect to frontend with user info
+      res.redirect(`${frontendUrl}/home?${queryString}`);
     } else {
-      // Fallback to standard redirect if no user info is available
       res.redirect(`${frontendUrl}/home`);
     }
   },
