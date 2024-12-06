@@ -37,5 +37,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Run migrations and start the server
-CMD ["sh", "-c", "yarn prisma migrate deploy && yarn start"]
+# Start the server using the compiled JavaScript
+CMD ["sh", "-c", "yarn prisma migrate deploy && node dist/app.js"]
