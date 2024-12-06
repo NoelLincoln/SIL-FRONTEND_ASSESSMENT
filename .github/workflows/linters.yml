@@ -107,15 +107,14 @@ jobs:
             export CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
             export CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
 
-      - name: Set up Docker Compose
+      - name: Install Docker Compose
         run: |
-            sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            docker-compose version
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S chmod +x /usr/local/bin/docker-compose
+          docker-compose version
 
       - name: Build and Start Services (using Docker Compose)
         run: |
-          # Ensure docker-compose uses the Docker Hub image for the backend service
           docker-compose -f ./docker-compose.yml up -d --build
 
       - name: Ensure Backend Container is Running
