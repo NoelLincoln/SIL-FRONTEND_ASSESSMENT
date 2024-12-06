@@ -10,7 +10,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: 'postgresql://postgres:5150@localhost:5432/sildb'
+      DATABASE_URL: 'postgresql://postgres:5150@77.37.121.63:5432/sildb'
       GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
       GHUB_CLIENT_SECRET: 'ee1118dc5b82cb7f2573ef641fe217e420fcf9cd'
       CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'
