@@ -13,9 +13,6 @@ RUN yarn install --frozen-lockfile
 # Copy the rest of the server application
 COPY . .
 
-#copy .env
-COPY .env .env
-
 # Generate Prisma Client
 RUN yarn prisma generate
 
@@ -40,5 +37,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Run migrations and start the server
-CMD ["sh", "-c", "yarn prisma migrate deploy && yarn start"]
+# Start the server using the compiled JavaScript
+CMD ["sh", "-c", "yarn prisma migrate deploy && node dist/src/app.js"]

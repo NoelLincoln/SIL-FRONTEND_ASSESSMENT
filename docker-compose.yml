@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: lincoln1000/sil-backend:latest
+    container_name: sil-backend
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: 'postgresql://sil_db_user:dAf1rSEZ13AzdaLIGUFBmeJd7DlIt46B@dpg-ct8699t2ng1s73f21u20-a.oregon-postgres.render.com/sil_db'
+      GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
+      GHUB_CLIENT_SECRET: 'ee1118dc5b82cb7f2573ef641fe217e420fcf9cd'
+      CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'
+      CLOUDINARY_API_KEY: '784574139734844'
+      CLOUDINARY_API_SECRET: 'Nu70HTehzjICDH9Js-9LPERMpKI'
+      NODE_ENV: 'production'  # Set to production for the production environment
+      REDIS_URL: 'rediss://red-ct7te356l47c73cbhi10:XuJMAWejmpt3dYz8xrqfpUZRz3TZlkmE@oregon-redis.render.com:6379'
+      GHUB_CALLBACK_URL: 'https://sil-backend-prod.onrender.com/api/auth/github/callback'
+      GHUB_CALLBACK_URL_DEV: 'http://localhost:10000/api/auth/github/callback'
+    restart: always
+    networks:
+      - sil_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  sil_network:
+    driver: bridge
