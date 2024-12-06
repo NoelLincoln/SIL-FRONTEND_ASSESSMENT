@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=10s \
   CMD curl -f http://localhost:3000/health || exit 1
 
 # Start the server using the compiled JavaScript
-CMD ["sh", "-c", "yarn prisma migrate deploy && node dist/app.js"]
+CMD ["sh", "-c", "yarn prisma migrate deploy && node dist/src/app.js"]
