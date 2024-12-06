@@ -113,22 +113,15 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
             docker-compose version
 
-      - name: Pull the latest backend image
+      - name: Build and Start Services (using Docker Compose)
         run: |
-          docker-compose -f ./docker-compose.yml pull backend
-
-      - name: Clean up old containers and networks
-        run: |
-            docker-compose -f ./docker-compose.yml down
-
-      - name: Build and start the services
-        run: |
-            docker-compose -f ./docker-compose.yml up -d --build
+          # Ensure docker-compose uses the Docker Hub image for the backend service
+          docker-compose -f ./docker-compose.yml up -d --build
 
       - name: Ensure Backend Container is Running
         run: |
-            echo "Checking if backend container is running..."
-            docker ps | grep "sil-backend" || exit 1
+          echo "Checking if backend container is running..."
+          docker ps | grep "sil-backend" || exit 1
 
       - name: Cleanup unused containers and images
         run: docker system prune -f --volumes
