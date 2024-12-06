@@ -20,6 +20,7 @@ describe('Header Component', () => {
   it('renders the logo', () => {
     const mockState: Partial<RootState> = {
       auth: {
+        name: '',
         email: '',
         isAuthenticated: false,
         loading: false,
@@ -45,6 +46,7 @@ describe('Header Component', () => {
   it('displays user profile and logout button when authenticated', () => {
     const mockState: Partial<RootState> = {
       auth: {
+        name: '',
         email: 'john@example.com',
         isAuthenticated: true,
         loading: false,
@@ -77,6 +79,7 @@ describe('Header Component', () => {
   it('displays user profile and logout button when authenticated with null id', () => {
     const mockState: Partial<RootState> = {
       auth: {
+        name: '',
         email: 'john@example.com',
         isAuthenticated: true,
         loading: false,
@@ -109,6 +112,7 @@ describe('Header Component', () => {
   it('displays loading text on logout button when logout is in progress', () => {
     const mockState: Partial<RootState> = {
       auth: {
+        name: '',
         email: 'john@example.com',
         isAuthenticated: true,
         loading: true, // Simulate loading state
@@ -137,6 +141,7 @@ describe('Header Component', () => {
   it('closes the profile dropdown when clicking outside of it', () => {
     const mockState: Partial<RootState> = {
       auth: {
+        name: '',
         email: 'john@example.com',
         isAuthenticated: true,
         loading: false,
@@ -162,7 +167,7 @@ describe('Header Component', () => {
     expect(screen.getByText(/john@example.com/)).toBeInTheDocument();
 
     // Click outside the dropdown (simulating a click on the background)
-    fireEvent.click(document.body);
+    fireEvent.mouseDown(document.body);
 
     // Ensure the dropdown is closed
     expect(screen.queryByText(/john@example.com/)).toBeNull();
@@ -171,6 +176,7 @@ describe('Header Component', () => {
   it('renders the back button only on small screens', () => {
     const mockState: Partial<RootState> = {
       auth: {
+        name: '',
         email: '',
         isAuthenticated: false,
         loading: false,
