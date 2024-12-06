@@ -89,6 +89,7 @@ jobs:
           docker build -t lincoln1000/sil-backend:latest .
           docker push lincoln1000/sil-backend:latest
 
+  # Deploy the backend to the server
   deploy:
     needs: deploy-backend
     runs-on: ubuntu-latest
@@ -111,6 +112,10 @@ jobs:
             sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
             docker-compose version
+
+      - name: Pull the latest backend image
+        run: |
+          docker-compose -f ./docker-compose.yml pull backend
 
       - name: Clean up old containers and networks
         run: |
