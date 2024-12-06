@@ -58,7 +58,7 @@ jobs:
   # Build and deploy backend using Docker Compose
   deploy-backend:
     needs: lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Source
         uses: actions/checkout@v3
@@ -92,7 +92,7 @@ jobs:
   # Deploy the backend to the server
   deploy:
     needs: deploy-backend
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Source
         uses: actions/checkout@v3
