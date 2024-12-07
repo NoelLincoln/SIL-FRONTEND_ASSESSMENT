@@ -11,7 +11,7 @@ const Header: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   // Access the user email, authentication state, and loading/error from Redux
-  const { email, isAuthenticated, loading, error } = useSelector(
+  const { username, isAuthenticated, loading, error } = useSelector(
     (state: RootState) => state.auth
   );
 
@@ -74,15 +74,12 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex items-center justify-between px-6">
         {/* Logo */}
         <div className="flex items-center text-2xl font-semibold space-x-2">
-          {/* Angle Left Icon - Visible Only on Small Devices */}
-          <div className="flex items-center text-2xl font-semibold space-x-2">
-            <FaAngleLeft
-              size={30}
-              className="lg:hidden block cursor-pointer"
-              onClick={goBack}
-              data-testid="back-button"
-            />
-          </div>
+          <FaAngleLeft
+            size={30}
+            className="lg:hidden block cursor-pointer"
+            onClick={goBack}
+            data-testid="back-button"
+          />
           <Link to="/home">
             <img
               src="/images/logo.png"
@@ -102,7 +99,7 @@ const Header: React.FC = () => {
           <Link to="/albums" className="hover:text-gray-400">
             Albums
           </Link>
-          
+
           {isAuthenticated && (
             <div className="relative">
               <button
@@ -114,14 +111,14 @@ const Header: React.FC = () => {
               </button>
               {isProfileOpen && (
                 <div
-                  className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48"
+                  className="absolute right-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-48 z-30"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <p>{email || "Loading..."}</p>
+                  <p>{username || "Loading..."}</p>
                   <button
                     className="text-red-500 mt-2"
                     onClick={handleLogout}
-                    disabled={loading} // Disable the logout button if loading
+                    disabled={loading}
                   >
                     {loading ? "Logging out..." : "Logout"}
                   </button>
@@ -165,7 +162,7 @@ const Header: React.FC = () => {
             >
               Albums
             </Link>
-            
+
             {isAuthenticated && (
               <div className="relative">
                 <button
@@ -177,14 +174,14 @@ const Header: React.FC = () => {
                 </button>
                 {isProfileOpen && (
                   <div
-                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto"
+                    className="absolute left-0 mt-2 bg-white text-gray-800 p-4 rounded-lg shadow-md w-auto z-30"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <p>{email || "Loading..."}</p>
+                    <p>{username || "Loading..."}</p>
                     <button
                       className="text-red-500 mt-2"
                       onClick={handleLogout}
-                      disabled={loading} // Disable the logout button if loading
+                      disabled={loading}
                     >
                       {loading ? "Logging out..." : "Logout"}
                     </button>
@@ -197,17 +194,14 @@ const Header: React.FC = () => {
         </div>
       )}
 
-      {/* Background overlay for closing the mobile menu */}
-      {isNavOpen && (
+      {/* Background overlay for closing menus */}
+      {(isNavOpen || isProfileOpen) && (
         <div
           className="fixed inset-0 bg-black opacity-50 z-10"
-          onClick={closeNav}
-        />
-      )}
-      {isProfileOpen && (
-        <div
-          className="fixed inset-0 bg-black opacity-50 z-10"
-          onClick={closeProfile}
+          onClick={() => {
+            closeNav();
+            closeProfile();
+          }}
         />
       )}
     </header>

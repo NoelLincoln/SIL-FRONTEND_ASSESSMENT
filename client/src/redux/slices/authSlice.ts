@@ -5,8 +5,7 @@ import Cookies from "js-cookie";
 // Define the AuthState interface with proper types
 interface AuthState {
   id: string | null; // 'id' can be a string or null
-  email: string | null;
-  name: string | null; // Added name field
+  username: string | null; // Added name field
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -15,8 +14,7 @@ interface AuthState {
 // Initial state with 'loading' set to true
 const initialState: AuthState = {
   id: null,
-  email: null,
-  name: null, // Initialize name
+  username: null, // Initialize name
   isAuthenticated: false,
   loading: true, // Set loading to true initially
   error: null,
@@ -46,7 +44,9 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
 
 // Async thunk for fetching authenticated user details
 export const fetchAuthUser = createAsyncThunk<
-  { id: string; email: string },
+  {
+    username: null; id: string; email: string 
+},
   void,
   { rejectValue: string }
 >("auth/fetchAuthUser", async (_, { rejectWithValue }) => {
@@ -72,17 +72,15 @@ const authSlice = createSlice({
   reducers: {
     // New reducer to set the authentication state
     setAuthState: (state, action) => {
-      const { id, email, name } = action.payload;
+      const { id, username } = action.payload;
       state.id = id;
-      state.email = email;
-      state.name = name;
+      state.username = username;
       state.isAuthenticated = true;
       state.loading = false;
     },
     logout(state) {
       state.id = null;
-      state.email = null;
-      state.name = null; // Clear name on logout
+      state.username = null; // Clear name on logout
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
@@ -99,7 +97,7 @@ const authSlice = createSlice({
         console.log("Fetched user details successfully:", action.payload);
         state.loading = false;
         state.id = action.payload.id || null;
-        state.email = action.payload.email || null;
+        state.username = action.payload.username || null;
         state.isAuthenticated = true;
       })
       .addCase(fetchAuthUser.rejected, (state, action) => {
@@ -117,8 +115,7 @@ const authSlice = createSlice({
         console.log("User logged out successfully");
         state.loading = false;
         state.id = null;
-        state.email = null;
-        state.name = null; // Clear name on logout
+        state.username = null; // Clear name on logout
         state.isAuthenticated = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {

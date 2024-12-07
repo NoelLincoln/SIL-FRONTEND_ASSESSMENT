@@ -15,19 +15,20 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const id = searchParams.get("id");
-    const email = searchParams.get("email");
-    const name = searchParams.get("name");
+    const username = searchParams.get("username");
 
-    if (id && email && name) {
+    console.log("Username from params", username)
+
+    if (id && username) {
       // Save user info to cookies
-      Cookies.set("authUser", JSON.stringify({ id, email, name }), {
+      Cookies.set("authUser", JSON.stringify({ id, username }), {
         expires: 7, // Cookie expiry in days
-        secure: process.env.NODE_ENV === "development",
+        secure: process.env.NODE_ENV === "production",
         sameSite: "Lax",
       });
 
       // Dispatch auth state to Redux
-      dispatch(setAuthState({ id, email, name }));
+      dispatch(setAuthState({ id, username }));
     } else {
       // Check cookies for existing user info
       const storedUser = Cookies.get("authUser");
