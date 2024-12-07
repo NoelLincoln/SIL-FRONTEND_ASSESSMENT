@@ -70,7 +70,7 @@ const Header: React.FC = () => {
   }, [isProfileOpen, isNavOpen]);
 
   return (
-    <header className="bg-gray-800 text-white py-4">
+    <header className="bg-gray-800 text-white">
       <div className="container mx-auto flex items-center justify-between px-6">
         {/* Logo */}
         <div className="flex items-center text-2xl font-semibold space-x-2">
@@ -87,8 +87,8 @@ const Header: React.FC = () => {
             <img
               src="/images/logo.png"
               alt="Album Genie Logo"
-              width={150}
-              height={150}
+              width={120}
+              height={120}
               className="transition-transform duration-200 hover:scale-105 cursor-pointer"
             />
           </Link>
