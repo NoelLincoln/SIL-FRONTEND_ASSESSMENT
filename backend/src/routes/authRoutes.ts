@@ -25,8 +25,7 @@ router.get(
       const user = req.user as User;
       const userInfo = {
         id: user.id,
-        email: user.email,
-        name: user.name,
+        username: user.username,
       };
 
       // Convert userInfo to query string
