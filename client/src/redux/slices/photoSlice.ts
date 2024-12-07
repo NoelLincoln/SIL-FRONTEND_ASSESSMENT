@@ -44,6 +44,19 @@ export const updatePhotoTitle = createAsyncThunk(
   },
 );
 
+// Async thunk for deleting a photo
+export const deletePhoto = createAsyncThunk(
+  "photos/delete",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/photos/${id}`);
+      return response.data; // Return success message
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || "Failed to delete photo");
+    }
+  }
+);
+
 // Initial state for the slice
 export interface PhotoState {
   photos: Photo[];
@@ -97,7 +110,20 @@ const photoSlice = createSlice({
       .addCase(updatePhotoTitle.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      }) // Add delete photo case
+      .addCase(deletePhoto.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deletePhoto.fulfilled, (state, action) => {
+        state.loading = false;
+        const deletedPhotoId = action.payload.id;
+        state.photos = state.photos.filter((photo) => photo.id !== deletedPhotoId);
+      })
+      .addCase(deletePhoto.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
+      ;
   },
 });
 

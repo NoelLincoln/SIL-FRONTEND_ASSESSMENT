@@ -5,6 +5,7 @@ import { RootState } from "../redux/store";
 import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store"; // Import AppDispatch type
 import { Link, useNavigate } from "react-router-dom"; // Import Link for React Router
+import { toast } from "react-toastify"; // Import toast
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -47,9 +48,11 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       await dispatch(logoutUser()).unwrap();
+      toast.success("Successfully logged out!"); // Show success toast
       navigate("/"); // Redirect to landing page
     } catch (error) {
       console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again."); // Show error toast
     }
   };
 

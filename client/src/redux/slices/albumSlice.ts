@@ -151,6 +151,30 @@ export const createAlbum = createAsyncThunk(
   },
 );
 
+// Async thunk to add photos to an album
+export const addPhotosToAlbum = createAsyncThunk(
+  "albums/addPhotosToAlbum",
+  async (
+    { albumId, photos }: { albumId: string; photos: File[] },
+    { rejectWithValue }
+  ) => {
+    try {
+      const formData = new FormData();
+      photos.forEach((photo) => formData.append("photos", photo));
+
+      const response = await axios.patch(
+        `${baseUrl}/albums/${albumId}/photos`,
+        formData,
+        { withCredentials: true }
+      );
+
+      return { albumId, photos: response.data }; // Response contains new photos
+    } catch (err: any) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 const albumSlice = createSlice({
   name: "albums",
   initialState,
@@ -173,6 +197,18 @@ const albumSlice = createSlice({
       })
       .addCase(createAlbum.fulfilled, (state, action) => {
         state.albums.push(action.payload);
+        state.loading = false;
+      })
+      .addCase(addPhotosToAlbum.fulfilled, (state, action) => {
+        const { albumId, photos } = action.payload;
+        const album = state.albums.find((album) => album.id === albumId);
+        if (album) {
+          album.photos.push(...photos); // Append new photos to the album
+        }
+        state.loading = false;
+      })
+      .addCase(addPhotosToAlbum.rejected, (state, action) => {
+        state.error = action.payload as string;
         state.loading = false;
       })
       .addCase(createAlbum.rejected, (state, action) => {

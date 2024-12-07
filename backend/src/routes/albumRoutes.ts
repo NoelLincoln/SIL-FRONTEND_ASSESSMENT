@@ -6,6 +6,7 @@ import {
   createAlbum,
   updateAlbum,
   deleteAlbum,
+  addPhotosToAlbum,
 } from "../controllers/albumController";
 
 const router = express.Router();
@@ -30,6 +31,10 @@ router.post("/", upload.array("photos", 3), createAlbum);
  * Update album by ID
  */
 router.patch("/:id", updateAlbum);
+
+
+router.patch("/:id/photos", upload.array("photos", 3), addPhotosToAlbum);
+
 
 /**
  * Delete an album by ID
