@@ -3,41 +3,49 @@ import { FaBars, FaTimes, FaUserCircle, FaAngleLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
-import { AppDispatch } from "../redux/store";
-import { Link } from "react-router-dom";
+import { AppDispatch } from "../redux/store"; // Import AppDispatch type
+import { Link } from "react-router-dom"; // Import Link for React Router
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
+  // Access the user email, authentication state, and loading/error from Redux
   const { email, isAuthenticated, loading, error } = useSelector(
     (state: RootState) => state.auth
   );
 
   const dispatch = useDispatch<AppDispatch>();
 
+  // Toggle nav menu
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };
 
+  // Toggle profile dropdown
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
   };
 
+  // Close nav menu when clicking outside
   const closeNav = () => {
     if (isNavOpen) setIsNavOpen(false);
   };
 
+  // Close profile dropdown when clicking outside
   const closeProfile = () => {
     if (isProfileOpen) setIsProfileOpen(false);
   };
 
+  // Go back to the previous page
   const goBack = () => {
     window.history.back();
   };
 
+  // Logout user by dispatching the async logoutUser action
   const handleLogout = async () => {
     try {
+      // Dispatch the logoutUser action to perform logout API call
       await dispatch(logoutUser());
     } catch (error) {
       console.error("Error logging out:", error);
@@ -46,11 +54,12 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated && !loading) {
+      // If the user is not authenticated and there's no loading, perform the API call to fetch user data
       dispatch(fetchAuthUser());
     }
   }, [dispatch, isAuthenticated, loading]);
 
-  // Prevent horizontal scrolling when menu or profile dropdown is open
+  // Prevent horizontal scrolling when profile dropdown is open
   useEffect(() => {
     if (isProfileOpen || isNavOpen) {
       document.body.style.overflowX = "hidden";
@@ -59,37 +68,16 @@ const Header: React.FC = () => {
     }
   }, [isProfileOpen, isNavOpen]);
 
-  // Close the profile dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const profileDropdown = document.querySelector(
-        '.relative div'
-      );
-      if (profileDropdown && !profileDropdown.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
-    };
-
-    if (isProfileOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isProfileOpen]);
-
   return (
     <header className="bg-gray-800 text-white py-4">
       <div className="container mx-auto flex items-center justify-between px-6">
+        {/* Logo */}
         <div className="flex items-center text-2xl font-semibold space-x-2">
+          {/* Angle Left Icon - Visible Only on Small Devices */}
           <div className="flex items-center text-2xl font-semibold space-x-2">
             <FaAngleLeft
               size={30}
               className="lg:hidden block cursor-pointer"
-              data-testid="back-button"
               onClick={goBack}
             />
           </div>
@@ -104,6 +92,7 @@ const Header: React.FC = () => {
           </Link>
         </div>
 
+        {/* Nav for Large Screens */}
         <nav className="hidden lg:flex space-x-6">
           <Link to="/home" className="hover:text-gray-400">
             Home
@@ -111,7 +100,7 @@ const Header: React.FC = () => {
           <Link to="/albums" className="hover:text-gray-400">
             Albums
           </Link>
-
+          
           {isAuthenticated && (
             <div className="relative">
               <button
@@ -130,7 +119,7 @@ const Header: React.FC = () => {
                   <button
                     className="text-red-500 mt-2"
                     onClick={handleLogout}
-                    disabled={loading}
+                    disabled={loading} // Disable the logout button if loading
                   >
                     {loading ? "Logging out..." : "Logout"}
                   </button>
@@ -141,14 +130,17 @@ const Header: React.FC = () => {
           )}
         </nav>
 
+        {/* Hamburger Menu Icon for Small Screens */}
         <button className="lg:hidden text-white" onClick={toggleNav}>
           {isNavOpen ? <FaTimes size={30} /> : <FaBars size={30} />}
         </button>
       </div>
 
+      {/* Mobile Navigation Menu */}
       {isNavOpen && (
         <div className="lg:hidden bg-gray-900 text-white py-6 px-6 absolute top-0 right-0 bottom-0 z-20 transition-transform duration-300 ease-in-out transform translate-x-0 w-10/12">
           <div className="flex flex-col items-center space-y-6">
+            {/* Close Icon */}
             <button
               className="absolute top-6 right-6 text-white"
               onClick={closeNav}
@@ -156,6 +148,7 @@ const Header: React.FC = () => {
               <FaTimes size={30} />
             </button>
 
+            {/* Menu Items */}
             <Link
               to="/home"
               className="block text-lg font-medium hover:text-gray-400"
@@ -170,7 +163,7 @@ const Header: React.FC = () => {
             >
               Albums
             </Link>
-
+            
             {isAuthenticated && (
               <div className="relative">
                 <button
@@ -189,7 +182,7 @@ const Header: React.FC = () => {
                     <button
                       className="text-red-500 mt-2"
                       onClick={handleLogout}
-                      disabled={loading}
+                      disabled={loading} // Disable the logout button if loading
                     >
                       {loading ? "Logging out..." : "Logout"}
                     </button>
@@ -202,6 +195,7 @@ const Header: React.FC = () => {
         </div>
       )}
 
+      {/* Background overlay for closing the mobile menu */}
       {isNavOpen && (
         <div
           className="fixed inset-0 bg-black opacity-50 z-10"

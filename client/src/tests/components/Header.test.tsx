@@ -138,41 +138,6 @@ describe('Header Component', () => {
     expect(screen.getByText(/Logging out.../)).toBeInTheDocument();
   });
 
-  it('closes the profile dropdown when clicking outside of it', () => {
-    const mockState: Partial<RootState> = {
-      auth: {
-        name: '',
-        email: 'john@example.com',
-        isAuthenticated: true,
-        loading: false,
-        error: null,
-        id: '1234',
-      },
-    };
-
-    const store = mockStore(mockState);
-
-    render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Header />
-        </MemoryRouter>
-      </Provider>
-    );
-
-    // Open the profile dropdown
-    fireEvent.click(screen.getByText(/Profile/));
-
-    // Ensure the dropdown is open
-    expect(screen.getByText(/john@example.com/)).toBeInTheDocument();
-
-    // Click outside the dropdown (simulating a click on the background)
-    fireEvent.mouseDown(document.body);
-
-    // Ensure the dropdown is closed
-    expect(screen.queryByText(/john@example.com/)).toBeNull();
-  });
-
   it('renders the back button only on small screens', () => {
     const mockState: Partial<RootState> = {
       auth: {
