@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 // Define the AuthState interface with proper types
 interface AuthState {
@@ -26,12 +27,15 @@ const devUrl = import.meta.env.VITE_DEV_URL;
 const prodUrl = import.meta.env.VITE_PROD_URL;
 const baseUrl = process.env.NODE_ENV === "production" ? prodUrl : devUrl;
 
-// Async thunk for logging out
 export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   "auth/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
+      // Perform logout on the backend
       await axios.get(`${baseUrl}/auth/logout`, { withCredentials: true });
+
+      // Destroy the authUser cookie
+      Cookies.remove("authUser");
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || "Error logging out. Please try again."
