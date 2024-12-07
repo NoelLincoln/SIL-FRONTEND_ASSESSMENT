@@ -125,3 +125,42 @@ export const deleteAlbum = async (
     res.status(500).json({ error: "Failed to delete album" });
   }
 };
+
+/**
+ * Add photos to album
+ */
+export const addPhotosToAlbum = async (req: Request, res: Response): Promise<void> => {
+  const { id: albumId } = req.params;
+  const files = req.files as Express.Multer.File[];
+
+  if (!files || files.length === 0) {
+    res.status(400).json({ error: "No files uploaded" });
+    return;
+  }
+
+  try {
+    const photoUrls = await Promise.all(
+      files.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "albums",
+        });
+        return result.secure_url;
+      })
+    );
+
+    // Add photos to album in the database
+    await albumService.addPhotosToAlbum(albumId, photoUrls);
+
+    // Prepare response data
+    const newPhotos = photoUrls.map((url) => ({
+      title: "Photo",
+      imageUrl: url,
+    }));
+
+    // Return the response with the uploaded photos
+    res.status(201).json(newPhotos);
+  } catch (error) {
+    console.error("Error adding photos to album:", error);
+    res.status(500).json({ error: "Failed to add photos to album" });
+  }
+};
