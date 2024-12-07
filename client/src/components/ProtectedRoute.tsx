@@ -23,9 +23,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (authUser) {
       try {
         const user = JSON.parse(authUser); // Parse JSON string
-        const { id, email, name } = user;
+        const { id,username } = user;
 
-        if (id && email && name) {
+        if (id && username) {
           setIsAuthenticated(true);
 
           // Fetch necessary data once authenticated
