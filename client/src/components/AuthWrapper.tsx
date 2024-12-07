@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setAuthState } from "../redux/slices/authSlice";
 import Cookies from "js-cookie";
@@ -11,13 +11,14 @@ interface AuthWrapperProps {
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const id = searchParams.get("id");
     const username = searchParams.get("username");
 
-    console.log("Username from params", username)
+    console.log("Username from params:", username);
 
     if (id && username) {
       // Save user info to cookies
@@ -29,6 +30,9 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
       // Dispatch auth state to Redux
       dispatch(setAuthState({ id, username }));
+
+      // Redirect to homepage
+      navigate("/home", { replace: true });
     } else {
       // Check cookies for existing user info
       const storedUser = Cookies.get("authUser");
@@ -37,7 +41,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         dispatch(setAuthState(user));
       }
     }
-  }, [dispatch, location.search]);
+  }, [dispatch, location.search, navigate]);
 
   return <>{children}</>;
 };
