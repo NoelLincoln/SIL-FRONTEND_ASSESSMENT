@@ -3,9 +3,11 @@ import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "./LoadingSpinner";
 import { fetchAlbums, addPhotosToAlbum } from "../redux/slices/albumSlice";
+import { deletePhoto } from "../redux/slices/photoSlice";
 import { AppDispatch } from "../redux/store";
 import Modal from "./Modal";
-import { toast } from 'react-toastify';  // Import toast
+import { toast } from "react-toastify";
+import { FaTrashAlt } from "react-icons/fa";
 
 const AlbumDetails: React.FC = () => {
   const { albumId } = useParams<{ albumId: string }>();
@@ -13,7 +15,8 @@ const AlbumDetails: React.FC = () => {
   const { albums, loading, error } = useSelector((state: any) => state.albums);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAddingPhotos, setIsAddingPhotos] = useState(false); // New state to track adding photos
+  const [modalType, setModalType] = useState<"add" | "delete">("add"); // Track modal type
+  const [photoIdToDelete, setPhotoIdToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (albumId) {
@@ -23,28 +26,44 @@ const AlbumDetails: React.FC = () => {
 
   const album = albums.find((album: any) => album.id === albumId);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => {
-    if (!isAddingPhotos) {
-      setIsModalOpen(false);
+  const openAddPhotosModal = () => {
+    setModalType("add");
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (photoId: string) => {
+    setPhotoIdToDelete(photoId);
+    setModalType("delete");
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
+
+  const handleAddPhotos = async (photos: File[], albumId: string) => {
+    try {
+      await dispatch(addPhotosToAlbum({ albumId, photos }));
+      toast.success("Photos added successfully!");
+      dispatch(fetchAlbums());
+    } catch (error) {
+      toast.error("Failed to add photos. Please try again.");
+    } finally {
+      closeModal();
     }
   };
 
-  const handleAddPhotos = async (photos: File[], albumId: string) => {
-    setIsAddingPhotos(true); // Set adding state to true
-    try {
-      await dispatch(addPhotosToAlbum({ albumId, photos })); // Dispatch the action
-      toast.success("Photos added successfully!"); // Show success toast
-      
-      // Refetch the album to get updated data (if necessary)
-      dispatch(fetchAlbums()); // This will re-fetch the album data from the backend
-    } catch (error) {
-      toast.error("Failed to add photos. Please try again."); // Show error toast
-    } finally {
-      setIsAddingPhotos(false); // Set adding state to false
+  const handleDeletePhoto = async () => {
+    if (photoIdToDelete) {
+      try {
+        await dispatch(deletePhoto(photoIdToDelete));
+        toast.success("Photo deleted successfully!");
+        dispatch(fetchAlbums());
+      } catch (error) {
+        toast.error("Failed to delete photo. Please try again.");
+      } finally {
+        closeModal();
+      }
     }
   };
-  
 
   if (loading) {
     return <LoadingSpinner />;
@@ -81,7 +100,7 @@ const AlbumDetails: React.FC = () => {
             Album: <span className="text-blue-600">{album.title}</span>
           </h2>
           <button
-            onClick={openModal}
+            onClick={openAddPhotosModal}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md"
           >
             Add Photos to Album
@@ -107,11 +126,20 @@ const AlbumDetails: React.FC = () => {
                   alt={photo.title}
                   className="w-full h-40 object-cover rounded-md mb-4"
                 />
-                <h4 className="text-lg font-semibold text-gray-700">{photo.title}</h4>
-                {/* Add link to edit photo title */}
-                <Link to={`/photos/edit/${photo.id}`} className="hover:underline">
-                  Edit Title
-                </Link>
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-gray-700">{photo.title}</h4>
+                  <div className="flex space-x-4">
+                    <Link to={`/photos/edit/${photo.id}`} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md">
+                      Edit Title
+                    </Link>
+                    <button
+                      onClick={() => openDeleteModal(photo.id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <FaTrashAlt className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))
           ) : (
@@ -125,7 +153,15 @@ const AlbumDetails: React.FC = () => {
         onClose={closeModal}
         album={album}
         onAddPhotos={handleAddPhotos}
-        title={""}
+        title={modalType === "add" ? "Add Photos" : "Delete Photo"}
+        footer={
+          modalType === "add" ? (
+            <p className="text-gray-500">Please select photos to upload.</p>
+          ) : (
+            <p className="text-gray-500">Are you sure you want to delete this photo?</p>
+          )
+        }
+        onDeleteConfirm={modalType === "delete" ? handleDeletePhoto : undefined} // Pass delete handler only for delete modal
         children={undefined}
       />
     </div>

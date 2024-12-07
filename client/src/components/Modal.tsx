@@ -9,39 +9,40 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  onDeleteConfirm?: () => void; // Make onDeleteConfirm optional
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, onAddPhotos, album, children, footer }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  title,
+  onClose,
+  onAddPhotos,
+  album,
+  children,
+  footer,
+  onDeleteConfirm
+}) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false); // Add a loading state
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Handle file selection and preview
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setSelectedFiles(files);
-
       const previews = files.map((file) => URL.createObjectURL(file));
       setPhotoPreviews(previews);
     }
   };
 
-  // Handle photo upload
   const handleUpload = async () => {
     if (album && selectedFiles.length > 0) {
-      setIsUploading(true); // Set uploading state to true
-
-      // Simulate async photo upload (replace with real upload logic)
+      setIsUploading(true);
       await onAddPhotos(selectedFiles, album.id);
-      
-      // Clear the selected files and previews after upload
       setSelectedFiles([]);
       setPhotoPreviews([]);
-
-      // Close modal after upload completes
-      setIsUploading(false); // Set uploading state to false
-      onClose(); // Close modal
+      setIsUploading(false);
+      onClose();
     }
   };
 
@@ -57,40 +58,42 @@ const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, onAddPhotos, albu
           </button>
         </div>
 
-        {/* File Input */}
-        <div className="mb-4">
-          <input
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            className="w-full mb-4 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
+        {title === "Add Photos" && (
+          <>
+            <input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="w-full mb-4 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+            {photoPreviews.length > 0 && (
+              <div className="flex gap-4 mb-4">
+                {photoPreviews.map((preview, index) => (
+                  <img key={index} src={preview} alt={`Preview ${index}`} className="w-16 h-16 object-cover rounded" />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={handleUpload}
+              disabled={selectedFiles.length === 0 || isUploading}
+              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+            >
+              {isUploading ? "Uploading..." : "Upload Photos"}
+            </button>
+          </>
+        )}
 
-        {/* Previews of selected photos */}
-        {photoPreviews.length > 0 && (
-          <div className="flex gap-4 mb-4">
-            {photoPreviews.map((preview, index) => (
-              <img
-                key={index}
-                src={preview}
-                alt={`Preview ${index}`}
-                className="w-16 h-16 object-cover rounded"
-              />
-            ))}
+        {title === "Delete Photo" && (
+          <div className="flex justify-center items-center mb-4">
+            <button
+              onClick={onDeleteConfirm}
+              className="w-full py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Confirm Deletion
+            </button>
           </div>
         )}
 
-        {/* Upload Button */}
-        <button
-          onClick={handleUpload}
-          disabled={selectedFiles.length === 0 || isUploading} // Disable if uploading
-          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          {isUploading ? "Uploading..." : selectedFiles.length > 0 ? "Upload Photos" : "No Photos Selected"}
-        </button>
-
-        {/* Footer */}
         {footer && <div className="mt-4">{footer}</div>}
       </div>
     </div>
