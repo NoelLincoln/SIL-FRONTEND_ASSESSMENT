@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 // Function to get the backend URL based on the environment
 const getBackendUrl = (): string => {
@@ -9,7 +9,12 @@ const getBackendUrl = (): string => {
 };
 
 const LandingPage: React.FC = () => {
+  const [loading, setLoading] = useState(false); // state to track loading status
   const backendUrl = getBackendUrl();
+
+  const handleSignInClick = () => {
+    setLoading(true); // Start loading when the button is clicked
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-[url('/images/background-image-auth.jpg')]">
@@ -23,9 +28,23 @@ const LandingPage: React.FC = () => {
         </p>
         <a
           href={backendUrl}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 px-8 rounded transition duration-200 ease-in-out"
+          onClick={handleSignInClick} // Trigger loading state on button click
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 px-8 rounded transition duration-200 ease-in-out flex items-center justify-center"
         >
-          Sign in with GitHub
+          {loading ? (
+            // Show loading spinner when loading is true
+            <svg
+              className="animate-spin h-5 w-5 mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            </svg>
+          ) : (
+            "Sign in with GitHub"
+          )}
         </a>
       </div>
     </div>
