@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Function to get the backend URL based on the environment
 const getBackendUrl = (): string => {
@@ -10,18 +10,28 @@ const getBackendUrl = (): string => {
 
 const LandingPage: React.FC = () => {
   const [loading, setLoading] = useState(false); // state to track loading status
+  const [imageSrc, setImageSrc] = useState("/images/background-image-auth.png");
   const backendUrl = getBackendUrl();
 
   const handleSignInClick = () => {
     setLoading(true); // Start loading when the button is clicked
   };
 
+  // Preload the high-quality image once the component is mounted
+  useEffect(() => {
+    const loadHighQualityImage = () => {
+      setImageSrc("/images/background-image-auth.png"); // Replace with high-quality image
+    };
+    loadHighQualityImage();
+  }, []);
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-[url('/images/background-image-auth.jpg')]">
+    <div
+      className="flex items-center justify-center min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: `url(${imageSrc})` }} // Set the background image dynamically
+    >
       <div className="flex flex-col items-center w-full max-w-md bg-white bg-opacity-90 rounded-lg shadow-xl p-6 sm:p-8 mx-4 sm:mx-auto">
-        <h1 className="text-4xl font-extrabold text-gray-800 mb-4">
-          Welcome to SIL
-        </h1>
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-4">Welcome to SIL</h1>
         <p className="text-lg text-gray-700 mb-6">
           Manage your albums effortlessly. Sign in to get started and explore
           our features!
