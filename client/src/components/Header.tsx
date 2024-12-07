@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { logoutUser, fetchAuthUser } from "../redux/slices/authSlice";
 import { AppDispatch } from "../redux/store"; // Import AppDispatch type
-import { Link } from "react-router-dom"; // Import Link for React Router
+import { Link, useNavigate } from "react-router-dom"; // Import Link for React Router
 
 const Header: React.FC = () => {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -16,6 +16,7 @@ const Header: React.FC = () => {
   );
 
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   // Toggle nav menu
   const toggleNav = () => {
@@ -45,10 +46,10 @@ const Header: React.FC = () => {
   // Logout user by dispatching the async logoutUser action
   const handleLogout = async () => {
     try {
-      // Dispatch the logoutUser action to perform logout API call
-      await dispatch(logoutUser());
+      await dispatch(logoutUser()).unwrap();
+      navigate("/"); // Redirect to landing page
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error("Logout failed:", error);
     }
   };
 

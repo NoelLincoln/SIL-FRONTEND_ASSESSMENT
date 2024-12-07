@@ -17,6 +17,8 @@ const Home: React.FC = () => {
     error: albumsError,
   } = useSelector((state: RootState) => state.albums);
 
+  console.log("Users",users)
+
   // Calculate the number of albums for each user
   const getUserAlbumCount = useCallback(
     (userId: string) =>
