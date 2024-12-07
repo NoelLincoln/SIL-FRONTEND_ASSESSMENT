@@ -20,8 +20,7 @@ describe('Header Component', () => {
   it('renders the logo', () => {
     const mockState: Partial<RootState> = {
       auth: {
-        name: '',
-        email: '',
+        username: '',
         isAuthenticated: false,
         loading: false,
         error: null,
@@ -46,8 +45,7 @@ describe('Header Component', () => {
   it('displays user profile and logout button when authenticated', () => {
     const mockState: Partial<RootState> = {
       auth: {
-        name: '',
-        email: 'john@example.com',
+        username: 'NoelLincoln',
         isAuthenticated: true,
         loading: false,
         error: null,
@@ -72,15 +70,14 @@ describe('Header Component', () => {
     fireEvent.click(screen.getByText(/Profile/));
 
     // Ensure the email is shown and the logout button is present
-    expect(screen.getByText(/john@example.com/)).toBeInTheDocument();
+    expect(screen.getByText(/NoelLincoln/)).toBeInTheDocument();
     expect(screen.getByText(/Logout/)).toBeInTheDocument();
   });
 
   it('displays user profile and logout button when authenticated with null id', () => {
     const mockState: Partial<RootState> = {
       auth: {
-        name: '',
-        email: 'john@example.com',
+        username: 'NoelLincoln',
         isAuthenticated: true,
         loading: false,
         error: null,
@@ -105,15 +102,14 @@ describe('Header Component', () => {
     fireEvent.click(screen.getByText(/Profile/));
 
     // Ensure the email is shown and the logout button is present
-    expect(screen.getByText(/john@example.com/)).toBeInTheDocument();
+    expect(screen.getByText(/NoelLincoln/)).toBeInTheDocument();
     expect(screen.getByText(/Logout/)).toBeInTheDocument();
   });
 
   it('displays loading text on logout button when logout is in progress', () => {
     const mockState: Partial<RootState> = {
       auth: {
-        name: '',
-        email: 'john@example.com',
+        username: 'NoelLincoln',
         isAuthenticated: true,
         loading: true, // Simulate loading state
         error: null,
@@ -141,8 +137,7 @@ describe('Header Component', () => {
   it('renders the back button only on small screens', () => {
     const mockState: Partial<RootState> = {
       auth: {
-        name: '',
-        email: '',
+        username: '',
         isAuthenticated: false,
         loading: false,
         error: null,
