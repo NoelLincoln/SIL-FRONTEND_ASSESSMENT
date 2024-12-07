@@ -7,7 +7,6 @@ interface ModalProps {
   album: { id: string; title: string } | null;
   onAddPhotos: (photos: File[], albumId: string) => void;
   onClose: () => void;
-  children: ReactNode;
   footer?: ReactNode;
   onDeleteConfirm?: () => void; // Make onDeleteConfirm optional
 }
@@ -18,7 +17,6 @@ const Modal: React.FC<ModalProps> = ({
   onClose,
   onAddPhotos,
   album,
-  children,
   footer,
   onDeleteConfirm
 }) => {

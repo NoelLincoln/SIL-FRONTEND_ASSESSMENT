@@ -161,8 +161,7 @@ const AlbumDetails: React.FC = () => {
             <p className="text-gray-500">Are you sure you want to delete this photo?</p>
           )
         }
-        onDeleteConfirm={modalType === "delete" ? handleDeletePhoto : undefined} // Pass delete handler only for delete modal
-        children={undefined}
+        onDeleteConfirm={modalType === "delete" ? handleDeletePhoto : undefined} 
       />
     </div>
   );
