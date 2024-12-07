@@ -79,6 +79,7 @@ const Header: React.FC = () => {
               size={30}
               className="lg:hidden block cursor-pointer"
               onClick={goBack}
+              data-testid="back-button"
             />
           </div>
           <Link to="/home">
