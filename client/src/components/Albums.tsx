@@ -4,12 +4,6 @@ import { FaTimes } from "react-icons/fa";
 import { createAlbum } from "../redux/slices/albumSlice";
 import { AppDispatch, RootState } from "../redux/store";
 
-// interface Photo {
-//   id: string;
-//   title: string;
-//   imageUrl: string;
-// }
-
 const Albums: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -59,7 +53,6 @@ const Albums: React.FC = () => {
       setToastMessage("Album has been successfully added!");
       setTimeout(() => setToastMessage(null), 3000);
 
-      // Close the modal and reset fields after successful album creation
       toggleModal();
       setAlbumTitle("");
       setAlbumPhotos([]);
@@ -130,7 +123,7 @@ const Albums: React.FC = () => {
                   </p>
                   <div className="flex flex-wrap gap-4">
                     {album.photos.length > 0 ? (
-                      album.photos.map((photo) => (
+                      album.photos.slice(0, 3).map((photo) => (
                         <img
                           key={photo.id}
                           src={photo.imageUrl}
