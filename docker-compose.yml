@@ -16,17 +16,8 @@ services:
       CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'
       CLOUDINARY_API_KEY: '784574139734844'
       CLOUDINARY_API_SECRET: 'Nu70HTehzjICDH9Js-9LPERMpKI'
-      NODE_ENV: 'production'  # Set to production for the production environment
+      NODE_ENV: 'production'
       REDIS_URL: 'rediss://red-ct7te356l47c73cbhi10:XuJMAWejmpt3dYz8xrqfpUZRz3TZlkmE@oregon-redis.render.com:6379'
       GHUB_CALLBACK_URL: 'https://sil.bnsalgotech.co.ke/api/auth/github/callback'
       GHUB_CALLBACK_URL_DEV: 'http://localhost:10000/api/auth/github/callback'
     restart: always
-    networks:
-      - sil_network
-
-volumes:
-  postgres_data:
-    driver: local
-
-networks:
-  - sil-frontend_assessment_sil_network
