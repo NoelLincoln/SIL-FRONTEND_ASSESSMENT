@@ -101,10 +101,11 @@ const AlbumDetails: React.FC = () => {
           </h2>
           <button
             onClick={openAddPhotosModal}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-md shadow-md text-sm md:px-4 md:py-2 md:text-base md:rounded-lg"
           >
             Add Photos to Album
           </button>
+
         </div>
 
         <p className="text-lg text-gray-600 mb-4">
@@ -161,7 +162,7 @@ const AlbumDetails: React.FC = () => {
             <p className="text-gray-500">Are you sure you want to delete this photo?</p>
           )
         }
-        onDeleteConfirm={modalType === "delete" ? handleDeletePhoto : undefined} 
+        onDeleteConfirm={modalType === "delete" ? handleDeletePhoto : undefined}
       />
     </div>
   );
