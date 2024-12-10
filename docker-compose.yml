@@ -29,5 +29,4 @@ volumes:
     driver: local
 
 networks:
-  sil_network:
-    driver: bridge
+  - sil-frontend_assessment_sil_network
