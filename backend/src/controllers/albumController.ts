@@ -17,11 +17,32 @@ export const getAlbums = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
+ * Get albums by userId
+ */
+export const getAlbumsByUserId = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { userId } = req.params;
+  try {
+    const albums = await albumService.getAlbumsByUserId(userId);
+    if (!albums || albums.length === 0) {
+      res.status(404).json({ error: "No albums found for this user" });
+      return;
+    }
+    res.status(200).json(albums);
+  } catch (error) {
+    console.error("Error fetching albums by user:", error);
+    res.status(500).json({ error: "Failed to fetch albums by user" });
+  }
+};
+
+/**
  * Get album by ID
  */
 export const getAlbumById = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
   try {
@@ -42,7 +63,7 @@ export const getAlbumById = async (
  */
 export const createAlbum = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { title, userId } = req.body;
   const files = req.files as Express.Multer.File[];
@@ -65,7 +86,7 @@ export const createAlbum = async (
           folder: "albums",
         });
         return result.secure_url;
-      }),
+      })
     );
 
     // Associate photos with the album
@@ -83,12 +104,13 @@ export const createAlbum = async (
     res.status(500).json({ error: "Failed to create album" });
   }
 };
+
 /**
  * Update album by ID
  */
 export const updateAlbum = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
   const { title } = req.body;
@@ -110,7 +132,7 @@ export const updateAlbum = async (
  */
 export const deleteAlbum = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
   try {

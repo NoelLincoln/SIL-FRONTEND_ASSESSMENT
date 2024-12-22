@@ -163,9 +163,11 @@ const Albums: React.FC = () => {
               <button
                 onClick={toggleModal}
                 className="text-red-500 hover:text-red-700"
+                aria-label="Close"
               >
                 <FaTimes />
               </button>
+
             </div>
             <input
               type="text"
@@ -174,12 +176,21 @@ const Albums: React.FC = () => {
               onChange={(e) => setAlbumTitle(e.target.value)}
               className="w-full px-4 py-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
+            <label htmlFor="photo-upload" className="block mb-2">
+              Upload Photos
+            </label>
             <input
+              id="photo-upload"
               type="file"
               multiple
               onChange={handlePhotoChange}
               className="w-full mb-4"
+              aria-describedby="photo-upload-info"
             />
+            <p id="photo-upload-info" className="text-sm text-gray-600">
+              You can select multiple images to upload.
+            </p>
+
             {photoPreviews.length > 0 && (
               <div className="flex gap-4 mb-4">
                 {photoPreviews.map((preview, index) => (

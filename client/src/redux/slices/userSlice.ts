@@ -84,12 +84,12 @@ export const fetchUserAlbums = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUserAlbums", async (userId, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${baseUrl}/albums?userId=${userId}`, {
+    const response = await fetch(`${baseUrl}/albums/users/${userId}`, {
       method: "GET",
       credentials: "include",
     });
     if (!response.ok) {
-      throw new Error("Failed to fetch albums");
+      throw new Error("No albums found for this user");
     }
     return await response.json();
   } catch (err: any) {
@@ -151,7 +151,11 @@ export const fetchAlbumPhotos = createAsyncThunk<
 const usersSlice = createSlice({
   name: "users",
   initialState,
-  reducers: {},
+  reducers: {
+    resetError: (state) => {
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUsers.pending, (state) => {
@@ -192,7 +196,7 @@ const usersSlice = createSlice({
       .addCase(fetchUserAlbums.rejected, (state, action) => {
         state.loading = false;
         state.userAlbums = [];
-        state.error = action.payload || "Failed to fetch user albums.";
+        state.error = action.payload || "No albums found for this user.";
       })
       .addCase(fetchAlbumPhotos.pending, (state) => {
         state.imageLoading = true;
@@ -209,5 +213,7 @@ const usersSlice = createSlice({
       });
   },
 });
+
+export const { resetError } = usersSlice.actions;
 
 export default usersSlice.reducer;
