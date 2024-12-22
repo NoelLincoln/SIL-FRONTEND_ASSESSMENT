@@ -7,6 +7,7 @@ import {
   updateAlbum,
   deleteAlbum,
   addPhotosToAlbum,
+  getAlbumsByUserId,
 } from "../controllers/albumController";
 
 const router = express.Router();
@@ -35,6 +36,9 @@ router.patch("/:id", updateAlbum);
 
 router.patch("/:id/photos", upload.array("photos", 3), addPhotosToAlbum);
 
+
+// Get albums by userId
+router.get("/users/:userId", getAlbumsByUserId)
 
 /**
  * Delete an album by ID

@@ -132,6 +132,8 @@ app.use(passport.session());
 // Routes for API
 app.use("/api/auth", authRoutes);
 app.use("/api/albums", albumRoutes);
+app.use("/api/albums/users", albumRoutes);
+
 
 // Protect album and photo routes
 app.use("/api/users", userRoutes);

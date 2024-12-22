@@ -91,4 +91,18 @@ export const deleteAlbum = async (id: string): Promise<Album | null> => {
   });
 };
 
+export const getAlbumsByUserId = async (userId: string) => {
+  try {
+    const albums = await prisma.album.findMany({
+      where: {
+        userId,
+      },
+    });
+    return albums;
+  } catch (error) {
+    console.error("Error fetching albums by user:", error);
+    throw new Error("Failed to fetch albums by user");
+  }
+};
+
 
