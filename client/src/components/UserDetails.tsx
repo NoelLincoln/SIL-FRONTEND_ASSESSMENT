@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom"; // Updated import
+import { useParams, Link } from "react-router-dom"; // Updated import
 import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "./LoadingSpinner";
 import {
@@ -13,7 +13,6 @@ import { AppDispatch } from "../redux/store";
 const UserDetails: React.FC = () => {
   const { userId } = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate(); // Using useNavigate for navigation
   const { userDetails, userAlbums, albumPhotos, loading, error, imageLoading } =
     useSelector((state: any) => state.users);
 
