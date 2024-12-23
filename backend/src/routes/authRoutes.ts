@@ -3,6 +3,19 @@ import { Router } from "express";
 import passport from "passport";
 import { handleGitHubUser } from "../services/userService";
 
+// Extend Express Request to include user type
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      name: string;
+      githubId?: string;
+      username: string;
+    }
+  }
+}
+
 const router = Router();
 
 // Determine frontend URL based on environment
@@ -22,24 +35,48 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: `${frontendUrl}/` }),
   async (req, res) => {
-    try {
-      const profile = req.user; // GitHub profile
-      const user = await handleGitHubUser(profile); // Process user
+    const prisma = req.app.get("prisma"); // Assuming Prisma is attached to the app instance
 
+    try {
+      const profile = req.user as Express.User;
+
+      const githubId = profile.githubId!;
+      const email = profile.email || `user-${githubId}@github.com`;
+      const name = profile.name || profile.username;
+
+      // Check for an existing user by githubId or email
+      let user = await prisma.user.findFirst({
+        where: {
+          OR: [{ githubId }, { email }],
+        },
+      });
+
+      // Create a new user only if no user exists
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            githubId,
+            email,
+            name,
+            username: profile.username,
+          },
+        });
+      }
+
+      // Prepare user info for redirect
       const userInfo = {
         id: user.id,
         username: user.username,
       };
-
       const queryString = new URLSearchParams(userInfo).toString();
+
       res.redirect(`${frontendUrl}/home?${queryString}`);
-    } catch (err) {
-      console.error("Error during GitHub authentication:", err);
-      res.redirect(`${frontendUrl}/`);
+    } catch (error) {
+      console.error("Error during GitHub authentication:", error);
+      res.redirect(`${frontendUrl}/error`);
     }
   },
 );
-
 
 // Logout route
 router.get("/logout", (req, res, next) => {
@@ -64,8 +101,8 @@ router.get("/logout", (req, res, next) => {
 // Check if the user is logged in and return the user's details
 router.get("/me", (req, res) => {
   if (req.isAuthenticated()) {
-    // Type assertion to inform TypeScript that req.user is of type `User`
-    const user = req.user as User;
+    // req.user is now typed properly
+    const user = req.user!;
     res.json({
       id: user.id,
       email: user.email,
@@ -78,7 +115,3 @@ router.get("/me", (req, res) => {
 });
 
 export default router;
-
-function next(err: any): void {
-  throw new Error("Function not implemented.");
-}

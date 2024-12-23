@@ -10,7 +10,7 @@ services:
     ports:
       - "10000:10000"
     environment:
-      DATABASE_URL: 'postgresql://sil_db_prod_user:5dL0JzKqeEDvt182OYCmWecKIfi8k0ln@dpg-ctkragqj1k6c73crsmu0-a.oregon-postgres.render.com/sil_db_prod'
+      DATABASE_URL: 'postgresql://sil_db_prod_dbp0_user:UvZuo7K6ncCtUYZily3Rx9LB7t9DPKlo@dpg-ctkrgm23esus73eb7880-a.oregon-postgres.render.com/sil_db_prod_dbp0'
       GHUB_CLIENT_ID: 'Ov23livoRJReDsZxf4rS'
       GHUB_CLIENT_SECRET: 'ee1118dc5b82cb7f2573ef641fe217e420fcf9cd'
       CLOUDINARY_CLOUD_NAME: 'ddvlpoy4j'

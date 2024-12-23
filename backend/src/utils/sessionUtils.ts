@@ -51,5 +51,5 @@ const getSessionFromRedis = (sessionId: string): Promise<any> => {
 
 // Function to get the authenticated user's ID from the session
 export const getUserFromSession = (req: express.Request): string | null => {
-  return req.user ? (req.user as string) : null;
+  return req.user ? (req.user as unknown as string) : null;
 };
