@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { Router } from "express";
 import passport from "passport";
+import { handleGitHubUser } from "../services/userService";
 
 const router = Router();
 
@@ -20,24 +21,25 @@ router.get(
 router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: `${frontendUrl}/` }),
-  (req, res) => {
-    if (req.user) {
-      const user = req.user as User;
+  async (req, res) => {
+    try {
+      const profile = req.user; // GitHub profile
+      const user = await handleGitHubUser(profile); // Process user
+
       const userInfo = {
         id: user.id,
         username: user.username,
       };
 
-      // Convert userInfo to query string
       const queryString = new URLSearchParams(userInfo).toString();
-
-      // Redirect to frontend with user info
       res.redirect(`${frontendUrl}/home?${queryString}`);
-    } else {
-      res.redirect(`${frontendUrl}/home`);
+    } catch (err) {
+      console.error("Error during GitHub authentication:", err);
+      res.redirect(`${frontendUrl}/`);
     }
   },
 );
+
 
 // Logout route
 router.get("/logout", (req, res, next) => {
