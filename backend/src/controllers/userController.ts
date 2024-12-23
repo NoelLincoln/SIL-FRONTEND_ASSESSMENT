@@ -23,6 +23,7 @@ export const handleGitHubUser = async (profile: any, res: Response) => {
   }
 };
 
+
 /**
  * Get all users
  */
