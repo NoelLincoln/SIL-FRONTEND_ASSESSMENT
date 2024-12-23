@@ -22,23 +22,54 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: `${frontendUrl}/` }),
   async (req, res) => {
-    try {
-      const profile = req.user; // GitHub profile
-      const user = await handleGitHubUser(profile); // Process user
+    const prisma = req.app.get("prisma"); // Assuming Prisma is attached to the app instance
 
+    try {
+      const profile = req.user as {
+        id: string;
+        username: string;
+        emails?: { value: string }[]; // From GitHub profile
+        displayName: string;
+      };
+
+      const githubId = profile.id;
+      const email = profile.emails?.[0]?.value || `user-${githubId}@github.com`;
+      const name = profile.displayName || profile.username;
+
+      // Check for an existing user by githubId or email
+      let user = await prisma.user.findFirst({
+        where: {
+          OR: [{ githubId }, { email }],
+        },
+      });
+
+      // Create a new user only if no user exists
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            githubId,
+            email,
+            name,
+            username: profile.username,
+          },
+        });
+      }
+
+      // Prepare user info for redirect
       const userInfo = {
         id: user.id,
         username: user.username,
       };
-
       const queryString = new URLSearchParams(userInfo).toString();
+
       res.redirect(`${frontendUrl}/home?${queryString}`);
-    } catch (err) {
-      console.error("Error during GitHub authentication:", err);
-      res.redirect(`${frontendUrl}/`);
+    } catch (error) {
+      console.error("Error during GitHub authentication:", error);
+      res.redirect(`${frontendUrl}/error`);
     }
-  },
+  }
 );
+
 
 
 // Logout route
