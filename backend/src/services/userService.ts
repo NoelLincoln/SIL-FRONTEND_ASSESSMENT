@@ -9,24 +9,34 @@ const prisma = new PrismaClient();
 export const handleGitHubUser = async (profile: any): Promise<User> => {
   const { id, username, displayName, emails } = profile;
 
-  // Check if the user already exists by GitHub ID or email
-  let user = await getUserByGitHubId(id);
+  // Extract the first email from GitHub
+  const email = emails?.[0]?.value;
 
-  if (!user && emails?.[0]?.value) {
-    // Check by email if no user is found by GitHub ID
-    user = await prisma.user.findUnique({ where: { email: emails[0].value } });
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { githubId: id }, // Check if the user already exists by GitHub ID
+        { email },        // Check if the user exists by email
+      ],
+    },
+  });
+
+  if (user) {
+    console.log("User found:", user.username);
+    return user; // Return the existing user
   }
 
-  if (!user) {
-    // If the user doesn't exist, create a new one
-    user = await createUser(
-      id,
-      username,
-      emails?.[0]?.value || "",
-      displayName || username,
-    );
-  }
+  // If no existing user, create a new one
+  user = await prisma.user.create({
+    data: {
+      githubId: id,
+      username: username || "Unknown",
+      email: email || `user-${id}@github.com`, // Fallback email if none provided
+      name: displayName || username || "Unknown User",
+    },
+  });
 
+  console.log("New user created:", user.username);
   return user;
 };
 
