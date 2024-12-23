@@ -121,13 +121,13 @@ app.use(
 );
 
 
-// ** Skip authentication for /api/auth/me route before passport initialization **
-app.use("/api/auth/me", authRoutes);
 
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ** Skip authentication for /api/auth/me route before passport initialization **
+app.use("/api/auth/me", authRoutes);
 
 // Routes for API
 app.use("/api/auth", authRoutes);
